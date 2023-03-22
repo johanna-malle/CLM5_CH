@@ -6,12 +6,10 @@ Created on 08.12.22 18:02
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
 from pathlib import Path
 import xarray as xr
 import matplotlib
 import platform
-import os
 
 # set font type for PDFs and EPSs
 matplotlib.rcParams['pdf.fonttype'] = 42
@@ -19,7 +17,7 @@ matplotlib.rcParams['ps.fonttype'] = 42
 
 # make switch to windows if working from home
 if platform.system() == 'Windows':
-    base_dir  = Path('L:\malle\CLM5_CH')
+    base_dir = Path('L:\malle\CLM5_CH')
 else:
     base_dir = Path('/home/lud11/malle/CLM5_CH')
     import xesmf as xe
@@ -85,7 +83,6 @@ def regrid_data(ds_in, ds_target):
     ds_out1 = regridder(ds_in3)
     ds_out = ds_out1.where(ds_out1.TBOT != 0, np.nan)
     return ds_out, regridder, back_regridder
-
 
 
 month_avg_05deg, re, back_re = regrid_data(month_avg_oshd, ds_target_05)
@@ -157,36 +154,17 @@ veg_global_025deg_coarse = regrid_025(input_global.PCT_NATVEG)
 veg_global_05deg_coarse = regrid_05(input_global.PCT_NATVEG)
 
 veg_highres_025deg_back = bacK_regridder_nearest_025(veg_highres_025deg_coarse)
-veg_highres_1deg_back = bacK_regridder_nearest_1(veg_highres_05deg_coarse)
+veg_highres_05deg_back = bacK_regridder_nearest_1(veg_highres_05deg_coarse)
 veg_highres_025deg = veg_highres_025deg_back.where(domain.mask.data, np.nan)
-veg_highres_1deg = veg_highres_1deg_back.where(domain.mask.data, np.nan)
+veg_highres_05deg = veg_highres_05deg_back.where(domain.mask.data, np.nan)
 
 veg_global_025deg_back = bacK_regridder_nearest_025(veg_global_025deg_coarse)
-veg_global_1deg_back = bacK_regridder_nearest_1(veg_global_05deg_coarse)
+veg_global_05deg_back = bacK_regridder_nearest_1(veg_global_05deg_coarse)
 veg_global_025deg = veg_global_025deg_back.where(domain.mask.data, np.nan)
-veg_global_1deg = veg_global_1deg_back.where(domain.mask.data, np.nan)
+veg_global_05deg = veg_global_05deg_back.where(domain.mask.data, np.nan)
 
-
-
-# now plotting etc.
-
-
-
-
-
-temp_month_avg_cru = temp_month_avg_cru.assign_coords({'geolon': lon_geo,
-                   'geolat': lat_geo})
-
-temp_month_avg_oshd = temp_month_avg_oshd.assign_coords({'geolon': lon_geo,
-                   'geolat': lat_geo})
-
-
-
-ds1 = temp_month_avg_cru.to_dataset()
-ds2 = ds1.swap_dims({"lat": "geolat"})
-temp_cru = ds2.swap_dims({"lon": "geolon"})
-
-ds1 = temp_month_avg_oshd.to_dataset()
-ds2 = ds1.swap_dims({"lat": "geolat"})
-temp_oshd = ds2.swap_dims({"lon": "geolon"})
+veg_highres_05deg.to_netcdf(file_vegHR_05deg)
+veg_global_05deg.to_netcdf(file_vegG_025deg)
+veg_global_025deg.to_netcdf(file_vegG_025deg)
+veg_highres_025deg.to_netcdf(file_vegHR_025deg)
 
