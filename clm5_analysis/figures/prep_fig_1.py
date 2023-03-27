@@ -71,10 +71,10 @@ file_cruplus_025deg = bf_out / 'temp_cruplus_025deg.nc'
 file_oshd_1km = bf_out / 'temp_oshd_1km.nc'
 file_cru_1km = bf_out / 'temp_cru_1km.nc'
 file_cruplus_1km = bf_out / 'temp_cruplus_1km.nc'
-
+file_test = bf_out / 'test_oshd_05deg.nc'
 
 def regrid_data(ds_in, ds_target):
-    ds_in1 = ds_in.assign_coords({'lsmlat': ds_in.LATIXY[:, 0], 'lsmlon': ds_in.LONGXY[0, :]})
+    ds_in1 = ds_in.assign_coords({'lsmlat': lat_geo, 'lsmlon': lon_geo})
     ds_in2 = ds_in1.swap_dims({'lon': 'lsmlon', 'lat': 'lsmlat'})
     ds_in3 = ds_in2.rename({'lsmlon': 'lon', 'lsmlat': 'lat'})
 
@@ -84,36 +84,44 @@ def regrid_data(ds_in, ds_target):
     ds_out = ds_out1.where(ds_out1.TBOT != 0, np.nan)
     return ds_out, regridder, back_regridder
 
+def regrid_oshd(ds_in, regridder, back_regridder):
+    ds_in1 = ds_in.assign_coords({'lsmlat': lat_geo, 'lsmlon': lon_geo})
+    ds_in2 = ds_in1.swap_dims({'lon': 'lsmlon', 'lat': 'lsmlat'})
+    ds_in3 = ds_in2.rename({'lsmlon': 'lon', 'lsmlat': 'lat'})
 
-month_avg_05deg, re, back_re = regrid_data(month_avg_oshd, ds_target_05)
-month_avg_05deg_back1km = back_re(month_avg_05deg)
-temp_oshd_05deg = month_avg_05deg_back1km.TBOT.where(domain.mask.data, np.nan)
-temp_oshd_05deg.to_netcdf(file_oshd_05deg)
+    ds_out1 = regridder(ds_in3)
+    ds_out = ds_out1.where(ds_out1.TBOT != 0, np.nan)
+
+    month_avg_back1km = back_regridder(ds_out)
+    ds_out_back = month_avg_back1km.TBOT.where(domain.mask.data, np.nan)
+
+    return ds_out_back
 
 month_avg_05deg, re, back_re = regrid_data(month_avg_cru, ds_target_05)
 month_avg_05deg_back1km = back_re(month_avg_05deg)
 temp_cru_05deg = month_avg_05deg_back1km.TBOT.where(domain.mask.data, np.nan)
 temp_cru_05deg.to_netcdf(file_cru_05deg)
 
-month_avg_05deg, re, back_re = regrid_data(month_avg_cruplus, ds_target_05)
-month_avg_05deg_back1km = back_re(month_avg_05deg)
+month_avg_05deg, re_05, back_re_05 = regrid_data(month_avg_cruplus, ds_target_05)
+month_avg_05deg_back1km = back_re_05(month_avg_05deg)
 temp_cruplus_05deg = month_avg_05deg_back1km.TBOT.where(domain.mask.data, np.nan)
 temp_cruplus_05deg.to_netcdf(file_cruplus_05deg)
 
-month_avg_025deg, re, back_re = regrid_data(month_avg_oshd, ds_target_025)
-month_avg_025deg_back1km = back_re(month_avg_025deg)
-temp_oshd_025deg = month_avg_025deg_back1km.TBOT.where(domain.mask.data, np.nan)
-temp_oshd_025deg.to_netcdf(file_oshd_025deg)
+temp_oshd_05deg = regrid_oshd(month_avg_oshd, re_05, back_re_05)
+temp_oshd_05deg.to_netcdf(file_oshd_05deg)
 
 month_avg_025deg, re, back_re = regrid_data(month_avg_cru, ds_target_025)
 month_avg_025deg_back1km = back_re(month_avg_025deg)
 temp_cru_025deg = month_avg_025deg_back1km.TBOT.where(domain.mask.data, np.nan)
-temp_cru_025deg.to_netcdf(file_cru_05deg)
+temp_cru_025deg.to_netcdf(file_cru_025deg)
 
-month_avg_025deg, re, back_re = regrid_data(month_avg_cruplus, ds_target_05)
+month_avg_025deg, re_025, back_re_025 = regrid_data(month_avg_cruplus, ds_target_025)
 month_avg_025deg_back1km = back_re(month_avg_025deg)
 temp_cruplus_025deg = month_avg_025deg_back1km.TBOT.where(domain.mask.data, np.nan)
 temp_cruplus_025deg.to_netcdf(file_cruplus_025deg)
+
+temp_oshd_025deg = regrid_oshd(month_avg_oshd, re_025, back_re_025)
+temp_oshd_025deg.to_netcdf(file_oshd_025deg)
 
 temp_oshd_1km = month_avg_oshd.TBOT.where(domain.mask.data, np.nan)
 temp_oshd_1km = temp_oshd_1km.assign_coords({'geolon': lon_geo, 'geolat': lat_geo})
@@ -126,7 +134,7 @@ temp_cru_1km = month_avg_cru.TBOT.where(domain.mask.data, np.nan)
 temp_cru_1km = temp_cru_1km.assign_coords({'geolon': lon_geo, 'geolat': lat_geo})
 ds1 = temp_cru_1km.to_dataset()
 ds2 = ds1.swap_dims({"lat": "geolat"})
-temp_cruplus_1km = ds2.swap_dims({"lon": "geolon"})
+temp_cru_1km = ds2.swap_dims({"lon": "geolon"})
 temp_cru_1km.to_netcdf(file_cru_1km)
 
 temp_cruplus_1km = month_avg_cruplus.TBOT.where(domain.mask.data, np.nan)
@@ -136,30 +144,29 @@ ds2 = ds1.swap_dims({"lat": "geolat"})
 temp_cruplus_1km = ds2.swap_dims({"lon": "geolon"})
 temp_cruplus_1km.to_netcdf(file_cruplus_1km)
 
-
 # now vegetation
 file_vegHR_025deg = bf_out / 'veg_gl_025.nc'
 file_vegHR_05deg = bf_out / 'veg_gl_05.nc'
 file_vegG_025deg = bf_out / 'veg_gl_025.nc'
 file_vegG_05deg = bf_out / 'veg_gl_05.nc'
 
-bacK_regridder_nearest_1 = xe.Regridder(ds_target_05, veg_highres, "nearest_s2d")
-bacK_regridder_nearest_025 = xe.Regridder(ds_target_025, veg_highres, "nearest_s2d")
-regrid_05 = xe.Regridder(veg_highres, ds_target_05, "nearest_s2d")
-regrid_025 = xe.Regridder(veg_highres, ds_target_025, "nearest_s2d")
+#bacK_regridder_nearest_1 = xe.Regridder(ds_target_05, month_avg_cruplus, "nearest_s2d")
+#bacK_regridder_nearest_025 = xe.Regridder(ds_target_025, month_avg_cruplus, "nearest_s2d")
+#regrid_05 = xe.Regridder(veg_highres, ds_target_05, "nearest_s2d")
+#regrid_025 = xe.Regridder(veg_highres, ds_target_025, "nearest_s2d")
 
-veg_highres_025deg_coarse = regrid_025(veg_highres)
-veg_highres_05deg_coarse = regrid_05(veg_highres)
-veg_global_025deg_coarse = regrid_025(input_global.PCT_NATVEG)
-veg_global_05deg_coarse = regrid_05(input_global.PCT_NATVEG)
+veg_highres_025deg_coarse = re_025(veg_highres)
+veg_highres_05deg_coarse = re_05(veg_highres)
+veg_global_025deg_coarse = re_025(input_global.PCT_NATVEG)
+veg_global_05deg_coarse = re_05(input_global.PCT_NATVEG)
 
-veg_highres_025deg_back = bacK_regridder_nearest_025(veg_highres_025deg_coarse)
-veg_highres_05deg_back = bacK_regridder_nearest_1(veg_highres_05deg_coarse)
+veg_highres_025deg_back = back_re_025(veg_highres_025deg_coarse)
+veg_highres_05deg_back = back_re_05(veg_highres_05deg_coarse)
 veg_highres_025deg = veg_highres_025deg_back.where(domain.mask.data, np.nan)
 veg_highres_05deg = veg_highres_05deg_back.where(domain.mask.data, np.nan)
 
-veg_global_025deg_back = bacK_regridder_nearest_025(veg_global_025deg_coarse)
-veg_global_05deg_back = bacK_regridder_nearest_1(veg_global_05deg_coarse)
+veg_global_025deg_back = back_re_025(veg_global_025deg_coarse)
+veg_global_05deg_back = back_re_05(veg_global_05deg_coarse)
 veg_global_025deg = veg_global_025deg_back.where(domain.mask.data, np.nan)
 veg_global_05deg = veg_global_05deg_back.where(domain.mask.data, np.nan)
 

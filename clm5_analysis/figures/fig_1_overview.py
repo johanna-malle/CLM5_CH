@@ -13,7 +13,6 @@ import cartopy.crs as ccrs
 import cartopy.feature as cf
 import cmocean
 import matplotlib
-import pyepsg
 import platform
 import os
 
@@ -23,7 +22,7 @@ matplotlib.rcParams['ps.fonttype'] = 42
 
 # make switch to windows if working from home
 if platform.system() == 'Windows':
-    base_dir  = Path('L:\malle\CLM5_CH')
+    base_dir = Path('L:\malle\CLM5_CH')
 else:
     base_dir = Path('/home/lud11/malle/CLM5_CH')
     import xesmf as xe
@@ -39,184 +38,68 @@ lat_geo = input_global.LATIXY[:, 0]
 lon_geo = input_global.LONGXY[0, :]
 input_global = input_global.assign_coords({'lsmlon': lon_geo.data, 'lsmlat': lat_geo.data})
 input_highres = input_highres.assign_coords({'lsmlon': lon_geo.data, 'lsmlat': lat_geo.data})
-veg_global = input_global.PCT_NATVEG.where(domain.mask.data, np.nan)
-veg_highres = input_highres.PCT_NATVEG.where(domain.mask.data, np.nan)
+veg_global_1km = input_global.PCT_NATVEG.where(domain.mask.data, np.nan)
+veg_highres_1km = input_highres.PCT_NATVEG.where(domain.mask.data, np.nan)
 
-input_oshd = xr.open_dataset(base_dir / 'clmforc.OSHD1km.TQ.2018-05.nc')
-month_avg_oshd = input_oshd.mean(dim='time')
-del input_oshd
-input_crujra = xr.open_dataset(base_dir / 'clmforc.crujra.TQ.2018-05.nc')
-month_avg_cru = input_crujra.mean(dim='time')
-del input_crujra
-input_crujra_plus = xr.open_dataset(base_dir / 'clmforc.crujra.TQ.2018-05_lapse.nc')
-month_avg_cruplus = input_crujra_plus.mean(dim='time')
-del input_crujra_plus
-
-# create target grids for 0.25deg and 1deg
-lat_new = surf_025deg.LATIXY.data[:, 0]
-lon_new = surf_025deg.LONGXY.data[0, :]
-ds_target_025 = xr.Dataset({"lat": (["lat"], lat_new), "lon": (["lon"], lon_new)})
-
-lat_new = surf_05deg.LATIXY.data[:, 0]
-lon_new = surf_05deg.LONGXY.data[0, :]
-ds_target_05 = xr.Dataset({"lat": (["lat"], lat_new), "lon": (["lon"], lon_new)})
-
-bf_out = base_dir / 'out_for_plots'
-bf_out.mkdir(parents=True, exist_ok=True)
+bf_files = base_dir / 'out_for_plots'
 
 # output data, so I can work with it on my windows machine
-file_oshd_05deg = bf_out / 'temp_oshd_05deg.nc'
-file_cru_05deg = bf_out / 'temp_cru_05deg.nc'
-file_cruplus_05deg = bf_out / 'temp_cruplus_05deg.nc'
-file_oshd_025deg = bf_out / 'temp_oshd_025deg.nc'
-file_cru_025deg = bf_out / 'temp_cru_025deg.nc'
-file_cruplus_025deg = bf_out / 'temp_cruplus_025deg.nc'
-file_oshd_1km = bf_out / 'temp_oshd_1km.nc'
-file_cru_1km = bf_out / 'temp_cru_1km.nc'
-file_cruplus_1km = bf_out / 'temp_cruplus_1km.nc'
-files_all = [file_oshd_05deg, file_cru_05deg, file_cruplus_05deg, file_oshd_025deg, file_cru_025deg,
-             file_cruplus_025deg, file_oshd_1km, file_cru_1km, file_cruplus_1km]
+file_oshd_05deg = bf_files / 'temp_oshd_05deg.nc'
+file_cru_05deg = bf_files / 'temp_cru_05deg.nc'
+file_cruplus_05deg = bf_files / 'temp_cruplus_05deg.nc'
+file_oshd_025deg = bf_files / 'temp_oshd_025deg.nc'
+file_cru_025deg = bf_files / 'temp_cru_025deg.nc'
+file_cruplus_025deg = bf_files / 'temp_cruplus_025deg.nc'
+file_oshd_1km = bf_files / 'temp_oshd_1km.nc'
+file_cru_1km = bf_files / 'temp_cru_1km.nc'
+file_cruplus_1km = bf_files / 'temp_cruplus_1km.nc'
 
+temp_oshd_05deg = xr.open_dataset(file_oshd_05deg)
+temp_oshd_05deg['lon']=temp_oshd_05deg['lon']-180
+temp_cru_05deg = xr.open_dataset(file_cru_05deg)
+temp_cruplus_05deg = xr.open_dataset(file_cruplus_05deg)
 
-def regrid_data(ds_in, ds_target):
-    ds_in1 = ds_in.assign_coords({'lsmlat': ds_in.LATIXY[:, 0], 'lsmlon': ds_in.LONGXY[0, :]})
-    ds_in2 = ds_in1.swap_dims({'lon': 'lsmlon', 'lat': 'lsmlat'})
-    ds_in3 = ds_in2.rename({'lsmlon': 'lon', 'lsmlat': 'lat'})
+temp_oshd_025deg = xr.open_dataset(file_oshd_025deg)
+temp_oshd_025deg['lon'] = temp_oshd_025deg['lon']-180
+temp_cru_025deg = xr.open_dataset(file_cru_025deg)
+temp_cruplus_025deg = xr.open_dataset(file_cruplus_025deg)
 
-    regridder = xe.Regridder(ds_in3, ds_target, "nearest_s2d")  # nearest_s2d
-    back_regridder = xe.Regridder(ds_target, ds_in3, "nearest_s2d")  # nearest_s2d
-    ds_out1 = regridder(ds_in3)
-    ds_out = ds_out1.where(ds_out1.TBOT != 0, np.nan)
-    return ds_out, regridder, back_regridder
-
-
-if file_oshd_05deg.is_file():
-    temp_oshd_05deg = xr.open_dataset(file_oshd_05deg)
-else:
-    month_avg_05deg, re, back_re = regrid_data(month_avg_oshd, ds_target_05)
-    month_avg_05deg_back1km = back_re(month_avg_05deg)
-    temp_oshd_05deg = month_avg_05deg_back1km.TBOT.where(domain.mask.data, np.nan)
-    temp_oshd_05deg.to_netcdf(file_oshd_05deg)
-
-if file_cru_05deg.is_file():
-    temp_cru_05deg = xr.open_dataset(file_cru_05deg)
-else:
-    month_avg_05deg, re, back_re = regrid_data(month_avg_cru, ds_target_05)
-    month_avg_05deg_back1km = back_re(month_avg_05deg)
-    temp_cru_05deg = month_avg_05deg_back1km.TBOT.where(domain.mask.data, np.nan)
-    temp_cru_05deg.to_netcdf(file_cru_05deg)
-
-if file_cruplus_05deg.is_file():
-    temp_cruplus_05deg = xr.open_dataset(file_cruplus_05deg)
-else:
-    month_avg_05deg, re, back_re = regrid_data(month_avg_cruplus, ds_target_05)
-    month_avg_05deg_back1km = back_re(month_avg_05deg)
-    temp_cruplus_05deg = month_avg_05deg_back1km.TBOT.where(domain.mask.data, np.nan)
-    temp_cruplus_05deg.to_netcdf(file_cruplus_05deg)
-
-if file_oshd_025deg.is_file():
-    temp_oshd_025deg = xr.open_dataset(file_oshd_025deg)
-else:
-    month_avg_025deg, re, back_re = regrid_data(month_avg_oshd, ds_target_025)
-    month_avg_025deg_back1km = back_re(month_avg_025deg)
-    temp_oshd_025deg = month_avg_025deg_back1km.TBOT.where(domain.mask.data, np.nan)
-    temp_oshd_025deg.to_netcdf(file_oshd_025deg)
-
-if file_cru_025deg.is_file():
-    temp_cru_025deg = xr.open_dataset(file_cru_025deg)
-else:
-    month_avg_025deg, re, back_re = regrid_data(month_avg_cru, ds_target_025)
-    month_avg_025deg_back1km = back_re(month_avg_025deg)
-    temp_cru_025deg = month_avg_025deg_back1km.TBOT.where(domain.mask.data, np.nan)
-    temp_cru_025deg.to_netcdf(file_cru_05deg)
-
-if file_cruplus_025deg.is_file():
-    temp_cruplus_025deg = xr.open_dataset(file_cruplus_025deg)
-else:
-    month_avg_025deg, re, back_re = regrid_data(month_avg_cruplus, ds_target_05)
-    month_avg_025deg_back1km = back_re(month_avg_025deg)
-    temp_cruplus_025deg = month_avg_025deg_back1km.TBOT.where(domain.mask.data, np.nan)
-    temp_cruplus_025deg.to_netcdf(file_cruplus_025deg)
-
-if file_oshd_1km.is_file():
-    temp_oshd_1km = xr.open_dataset(file_oshd_1km)
-else:
-    temp_oshd_1km = month_avg_oshd.TBOT.where(domain.mask.data, np.nan)
-    temp_oshd_1km.to_netcdf(file_oshd_1km)
-
-if file_cru_1km.is_file():
-    temp_cru_1km = xr.open_dataset(file_cru_1km)
-else:
-    temp_cru_1km = month_avg_cru.TBOT.where(domain.mask.data, np.nan)
-    temp_cru_1km.to_netcdf(file_cru_1km)
-
-if file_oshd_1km.is_file():
-    temp_cruplus_1km = xr.open_dataset(file_oshd_1km)
-else:
-    temp_cruplus_1km = month_avg_cruplus.TBOT.where(domain.mask.data, np.nan)
-    temp_cruplus_1km.to_netcdf(file_oshd_1km)
-
+temp_oshd_1km = xr.open_dataset(file_oshd_1km)
+temp_cru_1km = xr.open_dataset(file_cru_1km)
+temp_cruplus_1km = xr.open_dataset(file_oshd_1km)
 
 # now vegetation
-file_vegHR_025deg = bf_out / 'veg_gl_025.nc'
-file_vegHR_05deg = bf_out / 'veg_gl_05.nc'
-file_vegG_025deg = bf_out / 'veg_gl_025.nc'
-file_vegG_05deg = bf_out / 'veg_gl_05.nc'
-files_all_veg = [file_vegG_025deg, file_vegG_05deg, file_vegHR_025deg, file_vegHR_05deg]
+file_vegHR_025deg = bf_files / 'veg_gl_025.nc'
+file_vegHR_05deg = bf_files / 'veg_gl_05.nc'
+file_vegG_025deg = bf_files / 'veg_gl_025.nc'
+file_vegG_05deg = bf_files / 'veg_gl_05.nc'
 
-if all(list(map(os.path.isfile, files_all_veg))):
-    veg_highres_025deg = xr.open_dataset(file_vegHR_025deg)
-    veg_highres_05deg = xr.open_dataset(file_vegHR_05deg)
-    veg_global_025deg = xr.open_dataset(file_vegG_025deg)
-    veg_global_05deg = xr.open_dataset(file_vegG_05deg)
-else:
-    bacK_regridder_nearest_1 = xe.Regridder(ds_target_05, veg_highres, "nearest_s2d")
-    bacK_regridder_nearest_025 = xe.Regridder(ds_target_025, veg_highres, "nearest_s2d")
-    veg_highres_025deg_coarse = regrid_025(veg_highres)
-    veg_highres_05deg_coarse = regrid_05(veg_highres)
-    veg_global_025deg_coarse = regrid_025(input_global.PCT_NATVEG)
-    veg_global_05deg_coarse = regrid_05(input_global.PCT_NATVEG)
+veg_highres_025deg = xr.open_dataset(file_vegHR_025deg)
+veg_highres_05deg = xr.open_dataset(file_vegHR_05deg)
+veg_global_025deg = xr.open_dataset(file_vegG_025deg)
+veg_global_05deg = xr.open_dataset(file_vegG_05deg)
 
-    veg_highres_025deg_back = bacK_regridder_nearest_025(veg_highres_025deg_coarse)
-    veg_highres_1deg_back = bacK_regridder_nearest_1(veg_highres_05deg_coarse)
-    veg_highres_025deg = veg_highres_025deg_back.where(domain.mask.data, np.nan)
-    veg_highres_1deg = veg_highres_1deg_back.where(domain.mask.data, np.nan)
+test_oshd = xr.open_dataset(bf_files / 'test_oshd_05deg.nc')
 
-    veg_global_025deg_back = bacK_regridder_nearest_025(veg_global_025deg_coarse)
-    veg_global_1deg_back = bacK_regridder_nearest_1(veg_global_05deg_coarse)
-    veg_global_025deg = veg_global_025deg_back.where(domain.mask.data, np.nan)
-    veg_global_1deg = veg_global_1deg_back.where(domain.mask.data, np.nan)
+base_dir_t = Path('C:\\Users\malle\Documents')
+input_oshd = xr.open_dataset(base_dir_t / 'clmforc.OSHD1km.TQ.2018-05.nc')
+month_avg_oshd = input_oshd.mean(dim='time')
+del input_oshd
+input_crujra = xr.open_dataset(base_dir_t / 'clmforc.crujra.TQ.2018-05.nc')
+month_avg_cru = input_crujra.mean(dim='time')
+del input_crujra
 
 # now plotting etc.
-
-
-# plotting settings for later
+# plotting settings
 proj_data = ccrs.PlateCarree()
 proj_map = ccrs.UTM(zone=32, southern_hemisphere=False)
-
-lat_geo = month_avg_cruplus.LATIXY[:, 0]
-lon_geo = month_avg_cruplus.LONGXY[0, :]
-
-temp_month_avg_cruplus = temp_month_avg_cruplus.assign_coords({'geolon': lon_geo,
-                       'geolat': lat_geo})
-
-temp_month_avg_cru = temp_month_avg_cru.assign_coords({'geolon': lon_geo,
-                       'geolat': lat_geo})
-
-temp_month_avg_oshd = temp_month_avg_oshd.assign_coords({'geolon': lon_geo,
-                       'geolat': lat_geo})
-
-ds1 = temp_month_avg_cruplus.to_dataset()
-ds2 = ds1.swap_dims({"lat": "geolat"})
-temp_cru_plus = ds2.swap_dims({"lon": "geolon"})
-
-ds1 = temp_month_avg_cru.to_dataset()
-ds2 = ds1.swap_dims({"lat": "geolat"})
-temp_cru = ds2.swap_dims({"lon": "geolon"})
-
-ds1 = temp_month_avg_oshd.to_dataset()
-ds2 = ds1.swap_dims({"lat": "geolat"})
-temp_oshd = ds2.swap_dims({"lon": "geolon"})
+fig1 = plt.figure(figsize=[9, 6.5])
+ax0a = plt.subplot(111, projection=proj_map)
+#veg_highres_025deg['__xarray_dataarray_variable__'].plot(transform=proj_data, cmap=cmocean.cm.thermal, subplot_kws={'projection': proj_map})
+temp_oshd_025deg.TBOT.plot(transform=proj_data, cmap='viridis', subplot_kws={'projection': proj_map})
+ax0a.add_feature(cf.BORDERS, linewidth=1.2, edgecolor='dimgray', alpha=1)
+plt.axis('off')
+plt.show()
 
 # start with comp of CRUJRA data
 proj_data = ccrs.PlateCarree()
