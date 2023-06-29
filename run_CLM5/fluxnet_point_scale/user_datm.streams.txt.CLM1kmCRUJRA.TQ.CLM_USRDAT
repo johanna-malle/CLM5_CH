@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<file id="stream" version="1.0">
+<dataSource>
+   GENERIC
+</dataSource>
+<domainInfo>
+  <variableNames>
+     time    time
+        xc      lon
+        yc      lat
+        area    area
+        mask    mask
+  </variableNames>
+  <filePath>
+    /home/malle/CLM5_install/input_data/domains
+  </filePath>
+  <fileNames>
+    domain.lnd.CH-Oe2_navy.nc
+  </fileNames>
+</domainInfo>
+<fieldInfo>
+   <variableNames>
+     TBOT     tbot
+     QBOT     shum
+   </variableNames>
+   <filePath>
+     /media/malle/LaCie1/CLM5_input/PTCLM/met_input_fluxnet/CH-Oe2/cru_05/tair_rh_lapse
+   </filePath>
+   <fileNames>
+    clmforc.crujra.TQ.2013-01.nc
+clmforc.crujra.TQ.2013-02.nc
+clmforc.crujra.TQ.2013-03.nc
+clmforc.crujra.TQ.2013-04.nc
+clmforc.crujra.TQ.2013-05.nc
+clmforc.crujra.TQ.2013-06.nc
+clmforc.crujra.TQ.2013-07.nc
+clmforc.crujra.TQ.2013-08.nc
+clmforc.crujra.TQ.2013-09.nc
+clmforc.crujra.TQ.2013-10.nc
+clmforc.crujra.TQ.2013-11.nc
+clmforc.crujra.TQ.2013-12.nc
+clmforc.crujra.TQ.2014-01.nc
+clmforc.crujra.TQ.2014-02.nc
+clmforc.crujra.TQ.2014-03.nc
+clmforc.crujra.TQ.2014-04.nc
+clmforc.crujra.TQ.2014-05.nc
+clmforc.crujra.TQ.2014-06.nc
+clmforc.crujra.TQ.2014-07.nc
+clmforc.crujra.TQ.2014-08.nc
+clmforc.crujra.TQ.2014-09.nc
+clmforc.crujra.TQ.2014-10.nc
+clmforc.crujra.TQ.2014-11.nc
+clmforc.crujra.TQ.2014-12.nc
+clmforc.crujra.TQ.2015-01.nc
+clmforc.crujra.TQ.2015-02.nc
+clmforc.crujra.TQ.2015-03.nc
+clmforc.crujra.TQ.2015-04.nc
+clmforc.crujra.TQ.2015-05.nc
+clmforc.crujra.TQ.2015-06.nc
+clmforc.crujra.TQ.2015-07.nc
+clmforc.crujra.TQ.2015-08.nc
+clmforc.crujra.TQ.2015-09.nc
+clmforc.crujra.TQ.2015-10.nc
+clmforc.crujra.TQ.2015-11.nc
+clmforc.crujra.TQ.2015-12.nc
+clmforc.crujra.TQ.2016-01.nc
+clmforc.crujra.TQ.2016-02.nc
+clmforc.crujra.TQ.2016-03.nc
+clmforc.crujra.TQ.2016-04.nc
+clmforc.crujra.TQ.2016-05.nc
+clmforc.crujra.TQ.2016-06.nc
+clmforc.crujra.TQ.2016-07.nc
+clmforc.crujra.TQ.2016-08.nc
+clmforc.crujra.TQ.2016-09.nc
+clmforc.crujra.TQ.2016-10.nc
+clmforc.crujra.TQ.2016-11.nc
+clmforc.crujra.TQ.2016-12.nc
+clmforc.crujra.TQ.2017-01.nc
+clmforc.crujra.TQ.2017-02.nc
+clmforc.crujra.TQ.2017-03.nc
+clmforc.crujra.TQ.2017-04.nc
+clmforc.crujra.TQ.2017-05.nc
+clmforc.crujra.TQ.2017-06.nc
+clmforc.crujra.TQ.2017-07.nc
+clmforc.crujra.TQ.2017-08.nc
+clmforc.crujra.TQ.2017-09.nc
+clmforc.crujra.TQ.2017-10.nc
+clmforc.crujra.TQ.2017-11.nc
+clmforc.crujra.TQ.2017-12.nc
+clmforc.crujra.TQ.2018-01.nc
+clmforc.crujra.TQ.2018-02.nc
+clmforc.crujra.TQ.2018-03.nc
+clmforc.crujra.TQ.2018-04.nc
+clmforc.crujra.TQ.2018-05.nc
+clmforc.crujra.TQ.2018-06.nc
+clmforc.crujra.TQ.2018-07.nc
+clmforc.crujra.TQ.2018-08.nc
+clmforc.crujra.TQ.2018-09.nc
+clmforc.crujra.TQ.2018-10.nc
+clmforc.crujra.TQ.2018-11.nc
+clmforc.crujra.TQ.2018-12.nc
+clmforc.crujra.TQ.2019-01.nc
+clmforc.crujra.TQ.2019-02.nc
+clmforc.crujra.TQ.2019-03.nc
+clmforc.crujra.TQ.2019-04.nc
+clmforc.crujra.TQ.2019-05.nc
+clmforc.crujra.TQ.2019-06.nc
+clmforc.crujra.TQ.2019-07.nc
+clmforc.crujra.TQ.2019-08.nc
+clmforc.crujra.TQ.2019-09.nc
+clmforc.crujra.TQ.2019-10.nc
+clmforc.crujra.TQ.2019-11.nc
+clmforc.crujra.TQ.2019-12.nc
+clmforc.crujra.TQ.2020-01.nc
+clmforc.crujra.TQ.2020-02.nc
+clmforc.crujra.TQ.2020-03.nc
+clmforc.crujra.TQ.2020-04.nc
+clmforc.crujra.TQ.2020-05.nc
+clmforc.crujra.TQ.2020-06.nc
+clmforc.crujra.TQ.2020-07.nc
+clmforc.crujra.TQ.2020-08.nc
+clmforc.crujra.TQ.2020-09.nc
+clmforc.crujra.TQ.2020-10.nc
+clmforc.crujra.TQ.2020-11.nc
+clmforc.crujra.TQ.2020-12.nc
+   </fileNames>
+   <offset>
+      0
+   </offset>
+</fieldInfo>
+</file>

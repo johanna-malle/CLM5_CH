@@ -313,6 +313,8 @@ plt.scatter(stations_2000.x, stations_2000.y, marker='.', s=28, color='skyblue',
 plt.scatter(stations_3000.x, stations_3000.y, marker='.', s=28, color='skyblue', transform=proj_data, edgecolor='black', linewidth=0.25)
 plt.scatter(fluxnet_pts.x, fluxnet_pts.y, marker='.', s=30, color='forestgreen', transform=proj_data, edgecolor='black', linewidth=0.25)
 
+plt.subplots_adjust(wspace=0, hspace=0)
+
 plt.show()
 fig.savefig(base_dir / 'grid_comp2.pdf')
 fig.savefig(base_dir / 'grid_comp2.png', transparent=True, bbox_inches='tight')
