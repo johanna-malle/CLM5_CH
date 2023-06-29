@@ -11,18 +11,18 @@ import pandas as pd
 from pathlib import Path
 import os
 import seaborn as sns
-import xarray as xr
 import matplotlib
 import glob
-import math
+
 
 def mae(y_true, predictions):
     y_true, predictions = np.array(y_true), np.array(predictions)
-    return np.round(np.mean(np.abs(y_true - predictions)),2)
+    return np.round(np.mean(np.abs(y_true - predictions)), 2)
+
 
 def rmse(y_true, predictions):
     y_true, predictions = np.array(y_true), np.array(predictions)
-    return np.round(np.sqrt(((predictions - y_true) ** 2).mean()),2)
+    return np.round(np.sqrt(((predictions - y_true) ** 2).mean()), 2)
 
 
 matplotlib.rcParams['pdf.fonttype'] = 42
@@ -33,8 +33,8 @@ bf = Path('/home/lud11/malle/CLM5_CH')
 path_FSM = '/home/lud11/malle/CLM5_CH/FSM_new/analysed_points'
 all_files = glob.glob(os.path.join(path_FSM, "*.csv"))  # just do this once to get all ids
 all_locs_comp = list((f.split('/')[-1]).split('_')[1] for f in all_files)
-#if windows:
-#all_locs_comp = list((f.split('\\')[-1]).split('_')[1] for f in all_files)
+# if windows:
+# all_locs_comp = list((f.split('\\')[-1]).split('_')[1] for f in all_files)
 
 K = "MAE2"
 K1 = "5DO"
@@ -66,7 +66,7 @@ above_2000 = [x[0] for x in elev_comp if x[1] >= 2000]
 for locs in all_locs:
 
     meas_in = pd.read_csv(glob.glob(os.path.join(bf_meas, "*" + locs + "*.csv"))[0]).set_index('time_HS_meas')
-    meas_in = meas_in.loc[~meas_in.index.duplicated(keep='first')]  # this is necessary since some measurement seasons overlapped..
+    meas_in = meas_in.loc[~meas_in.index.duplicated(keep='first')]  # this is necessary since some seasons overlapped..
     print(locs)
     name_out = bf / 'snow_comp' / Path('station_'+locs+'_nov_may.csv')
     name_out_diff = bf / 'snow_comp' / Path('station_'+locs+'_diff_nov_may.csv')
@@ -91,12 +91,12 @@ for locs in all_locs:
                              'crujraP_newSurf', 'crujraP_origSurf'))
 
     # just do this once to get all ids
-    FSM = pd.read_csv(glob.glob(os.path.join(path_FSM, "*"+locs+"*.csv"))[0]) #.set_index('time_stamps_jim')
+    FSM = pd.read_csv(glob.glob(os.path.join(path_FSM, "*"+locs+"*.csv"))[0])  # .set_index('time_stamps_jim')
     FSM.loc[:, 'time_stamp_comp'] = FSM.time_stamps_jim.map(lambda x: x[:-9])
     FSM.set_index('time_stamp_comp', inplace=True)
-    FSM.drop(['time_stamps_jim','scf_jim','SWE_jim'], axis=1, inplace=True)
+    FSM.drop(['time_stamps_jim', 'scf_jim', 'SWE_jim'], axis=1, inplace=True)
     time_filter = pd.to_datetime(FSM.index)
-    FSM1 = FSM[((time_filter.month < 6) | (time_filter.month > 10)) & (time_filter.year < 2021)]  # only compare november - may
+    FSM1 = FSM[((time_filter.month < 6) | (time_filter.month > 10)) & (time_filter.year < 2021)]  # only comp. nov-may
 
     result_all = pd.concat([result, FSM1], axis=1, join='inner')
     result_all.to_csv(name_out)
@@ -125,18 +125,21 @@ for locs in all_locs:
                            ('crujra_newSurf', 'HS'), ('crujra_newSurf', 'SWE'),
                            ('crurja_origSurf', 'HS'), ('crurja_origSurf', 'SWE'),
                            ('crujraP_newSurf', 'HS'), ('crujraP_newSurf', 'SWE'),
-                           ('crujraP_origSurf', 'HS'), ('crujraP_origSurf', 'SWE'),'HS_jim'], inplace=True)
+                           ('crujraP_origSurf', 'HS'), ('crujraP_origSurf', 'SWE'), 'HS_jim'], inplace=True)
 
     diff_all.to_csv(name_out_diff)
 
 all_data_1000.drop(columns=[('oshd_newSurf', 'SWE'), ('oshd_origSurf', 'SWE'), ('crujra_newSurf', 'SWE'),
-                            ('crurja_origSurf', 'SWE'), ('crujraP_newSurf', 'SWE'), ('crujraP_origSurf', 'SWE')], inplace=True)
+                            ('crurja_origSurf', 'SWE'), ('crujraP_newSurf', 'SWE'), ('crujraP_origSurf', 'SWE')],
+                   inplace=True)
 
 all_data_2000.drop(columns=[('oshd_newSurf', 'SWE'), ('oshd_origSurf', 'SWE'), ('crujra_newSurf', 'SWE'),
-                            ('crurja_origSurf', 'SWE'), ('crujraP_newSurf', 'SWE'), ('crujraP_origSurf', 'SWE')], inplace=True)
+                            ('crurja_origSurf', 'SWE'), ('crujraP_newSurf', 'SWE'), ('crujraP_origSurf', 'SWE')],
+                   inplace=True)
 
 all_data_3000.drop(columns=[('oshd_newSurf', 'SWE'), ('oshd_origSurf', 'SWE'), ('crujra_newSurf', 'SWE'),
-                            ('crurja_origSurf', 'SWE'), ('crujraP_newSurf', 'SWE'), ('crujraP_origSurf', 'SWE')], inplace=True)
+                            ('crurja_origSurf', 'SWE'), ('crujraP_newSurf', 'SWE'), ('crujraP_origSurf', 'SWE')],
+                   inplace=True)
 
 all_data_1000_nona = all_data_1000.dropna()
 all_data_2000_nona = all_data_2000.dropna()
@@ -184,67 +187,82 @@ for file in Path(bf / 'snow_comp').glob("*diff.csv"):
     elif any(ext in str(file) for ext in above_2000):
         dfs_3000.append(pd.read_csv(file))
 
-df = pd.concat(dfs) # put the dataframes to a single dataframe
-df_1000 =  pd.concat(dfs_1000)
-df_2000 =  pd.concat(dfs_2000)
-df_3000 =  pd.concat(dfs_3000)
+df = pd.concat(dfs)  # put the dataframes to a single dataframe
+df_1000 = pd.concat(dfs_1000)
+df_2000 = pd.concat(dfs_2000)
+df_3000 = pd.concat(dfs_3000)
 
 plt.rc('font', family='serif')
 
 ########################################################################################################
 
 fig = plt.figure(figsize=(12, 12))
-my_pal = {"diff_cru_orig": (217/255,95/255,2/255), "diff_cru_new": (217/255,95/255,2/255),
-          "diff_cruP_orig":(117/255,112/255,179/255), "diff_cruP_new":(117/255,112/255,179/255),
-          "diff_oshd_orig":(27/255,158/255,119/255), "diff_oshd_new":(27/255,158/255,119/255),"FSM":"dimgray"}
+my_pal = {"diff_cru_orig": (217/255, 95/255, 2/255), "diff_cru_new": (217/255, 95/255, 2/255),
+          "diff_cruP_orig": (117/255, 112/255, 179/255), "diff_cruP_new": (117/255, 112/255, 179/255),
+          "diff_oshd_orig": (27/255, 158/255, 119/255), "diff_oshd_new": (27/255, 158/255, 119/255), "FSM": "dimgray"}
 
 flierprops = dict(marker='o', markersize=4.5, markeredgecolor='gray', markerfacecolor='silver', alpha=0.45)
 axes = fig.add_subplot(311)
-ax=sns.boxplot(data=np.abs(df_1000[['diff_cru_orig','diff_cru_new','diff_cruP_orig','diff_cruP_new',
-                                    'diff_oshd_orig','diff_oshd_new','FSM']]), ax = axes, palette=my_pal,
-               flierprops=flierprops, linewidth=1.6, saturation=0.8, showfliers = False)
-axes.set_title(r"$\bf{(a)}$"+' Locations < 1000m',loc='left',fontsize=16)
+ax = sns.boxplot(data=np.abs(df_1000[['diff_cru_orig', 'diff_cru_new', 'diff_cruP_orig', 'diff_cruP_new',
+                                      'diff_oshd_orig', 'diff_oshd_new', 'FSM']]), ax=axes, palette=my_pal,
+                 flierprops=flierprops, linewidth=1.6, saturation=0.8, showfliers=False)
+axes.set_title(r"$\bf{(a)}$"+' Locations < 1000m', loc='left', fontsize=16)
 axes.yaxis.grid(True)
 axes.set_xticklabels([])
-axes.set_ylabel(u'Δ HS [m] ',fontsize=14)
+axes.set_ylabel(u'Δ HS [m] ', fontsize=14)
 for label in (axes.get_xticklabels() + axes.get_yticklabels()):
-	label.set_fontsize(13)
+    label.set_fontsize(13)
 
 for patch in ax.patches[1:-1:2]:
     r, g, b, a = patch.get_facecolor()
     patch.set_facecolor((r, g, b, 0.5))
 
-plt.text(0.055, 0.59, 'RMSE='+str(rmse_1000.crurja_origSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
-plt.text(0.08, 0.59, 'MAE='+str(mae_1000.crurja_origSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
+plt.text(0.055, 0.59, 'RMSE='+str(rmse_1000.crurja_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.08, 0.59, 'MAE='+str(mae_1000.crurja_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
 
-plt.text(0.2, 0.48, 'RMSE='+str(rmse_1000.crujra_newSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
-plt.text(0.22, 0.48, 'MAE='+str(mae_1000.crujra_newSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
+plt.text(0.2, 0.48, 'RMSE='+str(rmse_1000.crujra_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.22, 0.48, 'MAE='+str(mae_1000.crujra_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
 
-plt.text(0.345, 0.3, 'RMSE='+str(rmse_1000.crujraP_origSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
-plt.text(0.365, 0.3, 'MAE='+str(mae_1000.crujraP_origSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
+plt.text(0.345, 0.3, 'RMSE='+str(rmse_1000.crujraP_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.365, 0.3, 'MAE='+str(mae_1000.crujraP_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
 
-plt.text(0.49, 0.27, 'RMSE='+str(rmse_1000.crujraP_newSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
-plt.text(0.51, 0.27, 'MAE='+str(mae_1000.crujraP_newSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
+plt.text(0.49, 0.27, 'RMSE='+str(rmse_1000.crujraP_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.51, 0.27, 'MAE='+str(mae_1000.crujraP_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
 
-plt.text(0.635, 0.25, 'RMSE='+str(rmse_1000.oshd_origSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
-plt.text(0.655, 0.25, 'MAE='+str(mae_1000.oshd_origSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
+plt.text(0.635, 0.25, 'RMSE='+str(rmse_1000.oshd_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.655, 0.25, 'MAE='+str(mae_1000.oshd_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
 
-plt.text(0.78, 0.25, 'RMSE='+str(rmse_1000.oshd_newSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
-plt.text(0.8, 0.25, 'MAE='+str(mae_1000.oshd_newSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
+plt.text(0.78, 0.25, 'RMSE='+str(rmse_1000.oshd_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.8, 0.25, 'MAE='+str(mae_1000.oshd_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
 
-plt.text(0.925, 0.25, 'RMSE='+str(rmse_1000.HS_jim.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
-plt.text(0.945, 0.25, 'MAE='+str(mae_1000.HS_jim.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
+plt.text(0.925, 0.25, 'RMSE='+str(rmse_1000.HS_jim.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.945, 0.25, 'MAE='+str(mae_1000.HS_jim.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
 
 plt.show()
 axes = fig.add_subplot(312)
-ax=sns.boxplot(data=np.abs(df_2000[['diff_cru_orig','diff_cru_new','diff_cruP_orig','diff_cruP_new','diff_oshd_orig','diff_oshd_new','FSM']]),
-            palette=my_pal, flierprops=flierprops, ax = axes, linewidth=1.6, saturation=0.8, showfliers = False)
-axes.set_title(r"$\bf{(b)}$"+' Locations 1000-2000m', loc='left',fontsize=16)
+ax = sns.boxplot(data=np.abs(df_2000[['diff_cru_orig', 'diff_cru_new', 'diff_cruP_orig', 'diff_cruP_new',
+                                    'diff_oshd_orig', 'diff_oshd_new', 'FSM']]),
+               palette=my_pal, flierprops=flierprops, ax = axes, linewidth=1.6, saturation=0.8, showfliers=False)
+axes.set_title(r"$\bf{(b)}$"+' Locations 1000-2000m', loc='left', fontsize=16)
 axes.yaxis.grid(True)
 axes.set_ylabel(u'Δ HS [m] ',fontsize=14)
 axes.set_xticklabels([])
 for label in (axes.get_xticklabels() + axes.get_yticklabels()):
-	label.set_fontsize(13)
+    label.set_fontsize(13)
 
 for patch in ax.patches[1:-1:2]:
     r, g, b, a = patch.get_facecolor()
@@ -280,7 +298,7 @@ axes.yaxis.grid(True)
 axes.set_ylabel(u'Δ HS [m] ', fontsize=14)
 #axes.set_ylim([-4,2.4])
 for label in (axes.get_xticklabels() + axes.get_yticklabels()):
-	label.set_fontsize(13)
+    label.set_fontsize(13)
 axes.set_xticklabels([r'Clim$_{CRU 1km}$+LU$_{Gl 1km}$','Clim$_{CRU 1km}$+LU$_{HR 1km}$',
                       r"Clim$_{CRU^{*} 1km}$+LU$_{Gl 1km}$","Clim$_{CRU^{*} 1km}$+LU$_{HR 1km}$",
                       "Clim$_{OSHD 1km}$+LU$_{Gl 1km}$","Clim$_{OSHD 1km}$+LU$_{HR 1km}$","Ref. (FSM2)"],rotation=20, ha='right')
@@ -351,7 +369,7 @@ axes.yaxis.grid(True)
 axes.set_xticklabels([])
 axes.set_ylabel(u'Δ HS [m] ', fontsize=15)
 for label in (axes.get_xticklabels() + axes.get_yticklabels()):
-	label.set_fontsize(14)
+    label.set_fontsize(14)
 
 for patch in ax.patches[1:-1:2]:
     r, g, b, a = patch.get_facecolor()
@@ -407,7 +425,7 @@ axes.yaxis.grid(True)
 axes.set_ylabel(u'Δ HS [m] ',fontsize=15)
 axes.set_xticklabels([])
 for label in (axes.get_xticklabels() + axes.get_yticklabels()):
-	label.set_fontsize(14)
+    label.set_fontsize(14)
 
 for patch in ax.patches[1:-1:2]:
     r, g, b, a = patch.get_facecolor()
@@ -461,7 +479,7 @@ axes.set_title(r"$\bf{(c)}$"+' Locations > 2000m (n = '+str(len(above_2000))+')'
 axes.yaxis.grid(True)
 axes.set_ylabel(u'Δ HS [m] ', fontsize=15)
 for label in (axes.get_xticklabels() + axes.get_yticklabels()):
-	label.set_fontsize(14)
+    label.set_fontsize(14)
 axes.set_xticklabels([r'Clim$_{CRU 1km}$+LU$_{Gl 1km}$','Clim$_{CRU 1km}$+LU$_{HR 1km}$',
                       r"Clim$_{CRU^{*} 1km}$+LU$_{Gl 1km}$","Clim$_{CRU^{*} 1km}$+LU$_{HR 1km}$",
                       "Clim$_{OSHD 1km}$+LU$_{Gl 1km}$","Clim$_{OSHD 1km}$+LU$_{HR 1km}$","Ref. (FSM2)"],
