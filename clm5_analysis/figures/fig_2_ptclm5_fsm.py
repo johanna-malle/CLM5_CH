@@ -255,11 +255,11 @@ plt.text(0.945, 0.25, 'MAE='+str(mae_1000.HS_jim.values[0])+'m', rotation=90, ha
 plt.show()
 axes = fig.add_subplot(312)
 ax = sns.boxplot(data=np.abs(df_2000[['diff_cru_orig', 'diff_cru_new', 'diff_cruP_orig', 'diff_cruP_new',
-                                    'diff_oshd_orig', 'diff_oshd_new', 'FSM']]),
-               palette=my_pal, flierprops=flierprops, ax = axes, linewidth=1.6, saturation=0.8, showfliers=False)
+                                      'diff_oshd_orig', 'diff_oshd_new', 'FSM']]),
+                 palette=my_pal, flierprops=flierprops, ax=axes, linewidth=1.6, saturation=0.8, showfliers=False)
 axes.set_title(r"$\bf{(b)}$"+' Locations 1000-2000m', loc='left', fontsize=16)
 axes.yaxis.grid(True)
-axes.set_ylabel(u'Δ HS [m] ',fontsize=14)
+axes.set_ylabel(u'Δ HS [m] ', fontsize=14)
 axes.set_xticklabels([])
 for label in (axes.get_xticklabels() + axes.get_yticklabels()):
     label.set_fontsize(13)
@@ -268,40 +268,56 @@ for patch in ax.patches[1:-1:2]:
     r, g, b, a = patch.get_facecolor()
     patch.set_facecolor((r, g, b, 0.5))
 
-plt.text(0.055, 0.6, 'RMSE='+str(rmse_2000.crurja_origSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
-plt.text(0.08, 0.6, 'MAE='+str(mae_2000.crurja_origSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
+plt.text(0.055, 0.6, 'RMSE='+str(rmse_2000.crurja_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.08, 0.6, 'MAE='+str(mae_2000.crurja_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
 
-plt.text(0.2, 0.6, 'RMSE='+str(rmse_2000.crujra_newSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
-plt.text(0.22, 0.6, 'MAE='+str(mae_2000.crujra_newSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
+plt.text(0.2, 0.6, 'RMSE='+str(rmse_2000.crujra_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.22, 0.6, 'MAE='+str(mae_2000.crujra_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
 
-plt.text(0.345, 0.67, 'RMSE='+str(rmse_2000.crujraP_origSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
-plt.text(0.365, 0.67, 'MAE='+str(mae_2000.crujraP_origSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
+plt.text(0.345, 0.67, 'RMSE='+str(rmse_2000.crujraP_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.365, 0.67, 'MAE='+str(mae_2000.crujraP_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
 
-plt.text(0.49, 0.678, 'RMSE='+str(rmse_2000.crujraP_newSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
-plt.text(0.51, 0.678, 'MAE='+str(mae_2000.crujraP_newSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
+plt.text(0.49, 0.678, 'RMSE='+str(rmse_2000.crujraP_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.51, 0.678, 'MAE='+str(mae_2000.crujraP_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
 
-plt.text(0.635, 0.355, 'RMSE='+str(rmse_2000.oshd_origSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
-plt.text(0.655, 0.355, 'MAE='+str(mae_2000.oshd_origSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
+plt.text(0.635, 0.355, 'RMSE='+str(rmse_2000.oshd_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.655, 0.355, 'MAE='+str(mae_2000.oshd_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
 
-plt.text(0.78, 0.34, 'RMSE='+str(rmse_2000.oshd_newSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
-plt.text(0.8, 0.34, 'MAE='+str(mae_2000.oshd_newSurf.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
+plt.text(0.78, 0.34, 'RMSE='+str(rmse_2000.oshd_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.8, 0.34, 'MAE='+str(mae_2000.oshd_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
 
-plt.text(0.925, 0.335, 'RMSE='+str(rmse_2000.HS_jim.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
-plt.text(0.945, 0.335, 'MAE='+str(mae_2000.HS_jim.values[0])+'m', rotation=90, ha='left', va='center', transform=axes.transAxes, fontsize=8.5)
+plt.text(0.925, 0.335, 'RMSE='+str(rmse_2000.HS_jim.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.945, 0.335, 'MAE='+str(mae_2000.HS_jim.values[0])+'m', rotation=90, ha='left', va='center',
+         transform=axes.transAxes, fontsize=8.5)
 
 axes = fig.add_subplot(313)
-ax=sns.boxplot(data=np.abs(df_3000[['diff_cru_orig','diff_cru_new','diff_cruP_orig','diff_cruP_new','diff_oshd_orig','diff_oshd_new','FSM']]),
-            palette=my_pal, flierprops=flierprops, ax = axes, linewidth=1.6, saturation=0.8, showfliers = False)
-axes.set_title(r"$\bf{(c)}$"+' Locations > 2000m', loc='left',fontsize=16)
+ax = sns.boxplot(data=np.abs(df_3000[['diff_cru_orig', 'diff_cru_new', 'diff_cruP_orig', 'diff_cruP_new',
+                                      'diff_oshd_orig', 'diff_oshd_new', 'FSM']]),
+                 palette=my_pal, flierprops=flierprops, ax=axes, linewidth=1.6, saturation=0.8, showfliers=False)
+axes.set_title(r"$\bf{(c)}$"+' Locations > 2000m', loc='left', fontsize=16)
 axes.yaxis.grid(True)
-#axes.set_xlabel('Used model',fontsize=14)
+# axes.set_xlabel('Used model',fontsize=14)
 axes.set_ylabel(u'Δ HS [m] ', fontsize=14)
-#axes.set_ylim([-4,2.4])
+# axes.set_ylim([-4,2.4])
 for label in (axes.get_xticklabels() + axes.get_yticklabels()):
     label.set_fontsize(13)
-axes.set_xticklabels([r'Clim$_{CRU 1km}$+LU$_{Gl 1km}$','Clim$_{CRU 1km}$+LU$_{HR 1km}$',
-                      r"Clim$_{CRU^{*} 1km}$+LU$_{Gl 1km}$","Clim$_{CRU^{*} 1km}$+LU$_{HR 1km}$",
-                      "Clim$_{OSHD 1km}$+LU$_{Gl 1km}$","Clim$_{OSHD 1km}$+LU$_{HR 1km}$","Ref. (FSM2)"],rotation=20, ha='right')
+axes.set_xticklabels([r'Clim$_{CRU 1km}$+LU$_{Gl 1km}$', 'Clim$_{CRU 1km}$+LU$_{HR 1km}$',
+                      r"Clim$_{CRU^{*} 1km}$+LU$_{Gl 1km}$", "Clim$_{CRU^{*} 1km}$+LU$_{HR 1km}$",
+                      "Clim$_{OSHD 1km}$+LU$_{Gl 1km}$", "Clim$_{OSHD 1km}$+LU$_{HR 1km}$", "Ref. (FSM2)"],
+                     rotation=20, ha='right')
 
 for patch in ax.patches[1:-1:2]:
     r, g, b, a = patch.get_facecolor()
@@ -352,18 +368,18 @@ fig.savefig(bf / 'ptclm5_comp_boxplot_abs.pdf', transparent=True)
 ########################################################################################################
 # now same plot with reg. values
 fig = plt.figure(figsize=(12, 12))
-my_pal = {"diff_cru_orig": (217/255,95/255,2/255), "diff_cru_new": (217/255,95/255,2/255),
-          "diff_cruP_orig":(117/255,112/255,179/255), "diff_cruP_new":(117/255,112/255,179/255),
-          "diff_oshd_orig":(27/255,158/255,119/255), "diff_oshd_new":(27/255,158/255,119/255),"FSM":"dimgray"}
+my_pal = {"diff_cru_orig": (217/255, 95/255, 2/255), "diff_cru_new": (217/255, 95/255, 2/255),
+          "diff_cruP_orig": (117/255, 112/255, 179/255), "diff_cruP_new": (117/255, 112/255, 179/255),
+          "diff_oshd_orig": (27/255, 158/255, 119/255), "diff_oshd_new": (27/255, 158/255, 119/255), "FSM": "dimgray"}
 
 flierprops = dict(marker='o', markersize=4.5, markeredgecolor='gray', markerfacecolor='silver', alpha=0.45)
 axes = fig.add_subplot(311)
-ax=sns.boxplot(data=df_1000[['diff_cru_orig','diff_cru_new','diff_cruP_orig','diff_cruP_new',
-                                    'diff_oshd_orig','diff_oshd_new','FSM']], ax = axes, palette=my_pal,
-               flierprops=flierprops, linewidth=1.6, saturation=0.8, showfliers = False,
-               meanprops={"marker": "o", "markerfacecolor": "white", "markeredgecolor": "black", "markersize": "6"},
-               medianprops=dict(color="grey", alpha=0.85, linewidth=1.9, linestyle='-'), showmeans=True)
-ax.axhline(0,color='k',linewidth=2.5)
+ax = sns.boxplot(data=df_1000[['diff_cru_orig', 'diff_cru_new', 'diff_cruP_orig', 'diff_cruP_new',
+                               'diff_oshd_orig', 'diff_oshd_new', 'FSM']], ax=axes, palette=my_pal,
+                 flierprops=flierprops, linewidth=1.6, saturation=0.8, showfliers=False,
+                 meanprops={"marker": "o", "markerfacecolor": "white", "markeredgecolor": "black", "markersize": "6"},
+                 medianprops=dict(color="grey", alpha=0.85, linewidth=1.9, linestyle='-'), showmeans=True)
+ax.axhline(0, color='k', linewidth=2.5)
 axes.set_title(r"$\bf{(a)}$"+' Locations < 1000m (n = '+str(len(less_1000))+')', loc='left', fontsize=17)
 axes.yaxis.grid(True)
 axes.set_xticklabels([])
@@ -375,7 +391,7 @@ for patch in ax.patches[1:-1:2]:
     r, g, b, a = patch.get_facecolor()
     patch.set_facecolor((r, g, b, 0.5))
 
-axes.set_ylim([-1.9,1.9])
+axes.set_ylim([-1.9, 1.9])
 
 plt.text(0.03, 0.11, 'RMSE='+str(rmse_1000.crurja_origSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
          transform=axes.transAxes, fontsize=11)
@@ -413,16 +429,16 @@ plt.text(0.87, 0.02, 'MAE='+str(mae_1000.HS_jim.values[0])+'m', rotation=0, ha='
          transform=axes.transAxes, fontsize=11)
 
 axes = fig.add_subplot(312)
-ax=sns.boxplot(data=df_2000[['diff_cru_orig','diff_cru_new','diff_cruP_orig','diff_cruP_new','diff_oshd_orig',
-                             'diff_oshd_new','FSM']],
-               palette=my_pal, flierprops=flierprops, ax = axes, linewidth=1.6, saturation=0.8, showfliers = False,
-               meanprops={"marker":"o", "markerfacecolor":"white", "markeredgecolor":"black", "markersize":"6"},
-               medianprops=dict(color="grey", alpha=0.85, linewidth=1.9, linestyle='-'), showmeans=True)
-ax.axhline(0,color='k',linewidth=2.5)
+ax = sns.boxplot(data=df_2000[['diff_cru_orig', 'diff_cru_new', 'diff_cruP_orig', 'diff_cruP_new', 'diff_oshd_orig',
+                               'diff_oshd_new', 'FSM']],
+                 palette=my_pal, flierprops=flierprops, ax=axes, linewidth=1.6, saturation=0.8, showfliers=False,
+                 meanprops={"marker": "o", "markerfacecolor": "white", "markeredgecolor": "black", "markersize": "6"},
+                 medianprops=dict(color="grey", alpha=0.85, linewidth=1.9, linestyle='-'), showmeans=True)
+ax.axhline(0, color='k', linewidth=2.5)
 
-axes.set_title(r"$\bf{(b)}$"+' Locations 1000-2000m (n = '+str(len(bw_1000_2000))+')', loc='left',fontsize=17)
+axes.set_title(r"$\bf{(b)}$"+' Locations 1000-2000m (n = '+str(len(bw_1000_2000))+')', loc='left', fontsize=17)
 axes.yaxis.grid(True)
-axes.set_ylabel(u'Δ HS [m] ',fontsize=15)
+axes.set_ylabel(u'Δ HS [m] ', fontsize=15)
 axes.set_xticklabels([])
 for label in (axes.get_xticklabels() + axes.get_yticklabels()):
     label.set_fontsize(14)
@@ -430,7 +446,7 @@ for label in (axes.get_xticklabels() + axes.get_yticklabels()):
 for patch in ax.patches[1:-1:2]:
     r, g, b, a = patch.get_facecolor()
     patch.set_facecolor((r, g, b, 0.5))
-axes.set_ylim([-1.9,1.9])
+axes.set_ylim([-1.9, 1.9])
 
 plt.text(0.03, 0.11, 'RMSE='+str(rmse_2000.crurja_origSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
          transform=axes.transAxes, fontsize=11)
@@ -468,28 +484,28 @@ plt.text(0.87, 0.02, 'MAE='+str(mae_2000.HS_jim.values[0])+'m', rotation=0, ha='
          transform=axes.transAxes, fontsize=11)
 
 axes = fig.add_subplot(313)
-ax=sns.boxplot(data=df_3000[['diff_cru_orig','diff_cru_new','diff_cruP_orig','diff_cruP_new','diff_oshd_orig',
-                             'diff_oshd_new','FSM']],
-               palette=my_pal, flierprops=flierprops, ax = axes, linewidth=1.6, saturation=0.8, showfliers = False,
-               meanprops={"marker":"o", "markerfacecolor":"white", "markeredgecolor":"black", "markersize":"6"},
-               medianprops=dict(color="grey", alpha=0.85, linewidth=1.9, linestyle='-'), showmeans=True)
-ax.axhline(0,color='k',linewidth=2.5)
+ax = sns.boxplot(data=df_3000[['diff_cru_orig', 'diff_cru_new', 'diff_cruP_orig', 'diff_cruP_new', 'diff_oshd_orig',
+                               'diff_oshd_new', 'FSM']],
+                 palette=my_pal, flierprops=flierprops, ax=axes, linewidth=1.6, saturation=0.8, showfliers=False,
+                 meanprops={"marker": "o", "markerfacecolor": "white", "markeredgecolor": "black", "markersize": "6"},
+                 medianprops=dict(color="grey", alpha=0.85, linewidth=1.9, linestyle='-'), showmeans=True)
+ax.axhline(0, color='k', linewidth=2.5)
 
-axes.set_title(r"$\bf{(c)}$"+' Locations > 2000m (n = '+str(len(above_2000))+')', loc='left',fontsize=17)
+axes.set_title(r"$\bf{(c)}$"+' Locations > 2000m (n = '+str(len(above_2000))+')', loc='left', fontsize=17)
 axes.yaxis.grid(True)
 axes.set_ylabel(u'Δ HS [m] ', fontsize=15)
 for label in (axes.get_xticklabels() + axes.get_yticklabels()):
     label.set_fontsize(14)
-axes.set_xticklabels([r'Clim$_{CRU 1km}$+LU$_{Gl 1km}$','Clim$_{CRU 1km}$+LU$_{HR 1km}$',
-                      r"Clim$_{CRU^{*} 1km}$+LU$_{Gl 1km}$","Clim$_{CRU^{*} 1km}$+LU$_{HR 1km}$",
-                      "Clim$_{OSHD 1km}$+LU$_{Gl 1km}$","Clim$_{OSHD 1km}$+LU$_{HR 1km}$","Ref. (FSM2)"],
+axes.set_xticklabels([r'Clim$_{CRU 1km}$+LU$_{Gl 1km}$', 'Clim$_{CRU 1km}$+LU$_{HR 1km}$',
+                      r"Clim$_{CRU^{*} 1km}$+LU$_{Gl 1km}$", "Clim$_{CRU^{*} 1km}$+LU$_{HR 1km}$",
+                      "Clim$_{OSHD 1km}$+LU$_{Gl 1km}$", "Clim$_{OSHD 1km}$+LU$_{HR 1km}$", "Ref. (FSM2)"],
                      rotation=20, ha='right', fontsize=15)
 
 for patch in ax.patches[1:-1:2]:
     r, g, b, a = patch.get_facecolor()
     patch.set_facecolor((r, g, b, .5))
 
-axes.set_ylim([-1.9,1.9])
+axes.set_ylim([-1.9, 1.9])
 
 plt.text(0.03, 0.105, 'RMSE='+str(rmse_3000.crurja_origSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
          transform=axes.transAxes, fontsize=11)
