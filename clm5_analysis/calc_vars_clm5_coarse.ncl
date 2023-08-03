@@ -1,0 +1,315 @@
+;---------------------------------------------------------------------------
+;
+; NCL Program to combine tiles over the extent of Switzerland
+;
+; Usage:
+;
+; 1.  Make a text file with tile numbers to be included.
+
+; 2. Check which variables are in the respective file (h0, h1,...)
+;    and adjust vars text file as well as add_yr parameter below accordingly
+;
+; 3.  Adjust the input and output parameters at the start of the
+; program below, as needed.
+;
+; 4.  Run this script with no command arguments:
+;
+;    ncl FILENAME.ncl
+;
+;---------------------------------------------------------------------------
+load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
+prog_id = "join.clm5_tiles.ncl"
+
+begin
+setfileoption ("nc", "Format", "64BitOffset")  ; use Netcdf large file format
+header_space = 5000     ; pad size to optimize Netcdf-3 output
+limit_2d_offset = 1.0e-08   ; offset limit for 2-D coordinates to trigger alignment warning
+
+
+coord_file = "/media/malle/LaCie1/SPIN_UP_TILES/ch_1km_OSHD_BGC_test.clm2.h0.2010-02-01-00000.nc" ; supplemental coordinate file
+surf_file = "/media/malle/LaCie/CLM5_input/surfdata_1km_CH_v3_hist_16pfts_Irrig_CMIP6_simyr2000_std25.nc" ; supplemental coordinate file
+
+ print ("")
+ print ("Read coordinate file: " + coord_file)
+ cf = addfile (coord_file, "r")
+ sf = addfile (surf_file, "r")
+
+ lat_main = sf->LATIXY; read master 2-D coordinates
+ lon_main = sf->LONGXY
+
+ xmain    = cf->lon    ; read master 1-D coordinates
+ ymain    = cf->lat    ; read master 1-D coordinates
+ nyc = dimsizes (ymain)
+ nxc = dimsizes (xmain)
+ print ("  Coordinate grid size lat, lon = " + nyc + " x " + nxc)
+ ngrid = nxc * nyc
+
+
+exp_grid = "/media/malle/LaCie1/CLM5_SP_TILES/OSHD_FILES/QOVER_SP_OSHD.nc"
+exp_grid_in = addfile (coord_file, "r")
+new_lon = exp_grid_in->lon
+new_lat = exp_grid_in->lat
+
+bf_out= "/media/malle/LaCie1/CLM5_SP_TILES/CRUJRA_FILES_1deg_cru_new/"
+
+bf_all="/media/malle/LaCie1/CLM5_coarse/ch_1deg_SP_CRUJRA_cru_new/lnd_hist/"
+
+;which h? - loop over h0-h3
+h_num_all=asciiread ("h_num_file", -1, "string")
+hfiles = dimsizes (h_num_all)
+do hi = 0, hfiles-1
+   h_num = h_num_all(hi);which h?
+
+   ;this is needed for overall swiss grid:
+
+   ;together with the tiles the simulation name will be determined, needing the following:
+   runID    = "ch_1deg_SP_CRUJRA_cru_new.clm2."+h_num+".2010-01-01-00000.nc"
+   ;followed by:
+   add_file="/"
+
+   infile = bf_all + runID
+   f = addfile (infile, "r")
+
+  gatts = True        ; copy most global attributes
+  copy_VarAtts (f, gatts)   ; indirect for NCL 6.0.0 workaround
+
+  if (isatt (gatts, "tileid")) then ; remove tile ID attribute,
+    delete (gatts@tileid)   ;    no longer singular
+  end if
+
+  time_stamp  = systemfunc ("date") ; add history attribute
+  new_history = time_stamp + ": Tiles joined by " + prog_id
+
+  if (isatt (gatts, "history")) then  ; append to previous history attribute
+    gatts@history = new_history + gatts@history
+  else
+    gatts@history = new_history
+  end if
+
+   ;where to save out files:
+   ;-----------------------------------------------------------
+   ; 1.  Read tile numbers and variables of interest from list file.
+   ;-----------------------------------------------------------
+   variables_all=asciiread ("vars_"+h_num, -1, "string")
+   nvars = dimsizes (variables_all)
+
+   do vi = 0, nvars-1
+      var = variables_all(vi)
+      print(var)
+      x1 = f->$var$&lon    ; read 1-D coordinate vectors
+      y1 = f->$var$&lat
+      data_in = f->$var$
+      time = f->$var$&time    ; read time coords for current file
+      time_dim_name = time!0    ; time dimension name, for later
+
+      outfile = bf_out+var+".nc"
+      print ("")
+      print ("Write output file: " + outfile)
+
+      if (isfilepresent (outfile)) then ; overwrite any previous file
+        system ("rm " + outfile)
+      end if
+
+      out = addfile (outfile, "c")    ; create new output file
+      setfileoption (out, "HeaderReserveSpace", header_space) ; optimize Netcdf-3 output; see NCL docs
+      copy_VarAtts (gatts, out)   ; write global attributes
+
+      dummy_size = -1     ; make the time dimension unlimited
+      opt_unlimited = True
+      filedimdef (out, time_dim_name, dummy_size, opt_unlimited)
+
+      out->DATA = data_in      ; write the main data array last,to improve speed
+      print ("Done.")
+
+      delete(outfile)
+      delete(out)
+
+   end do
+  delete(variables_all)
+end do
+
+delete(f)
+delete(x1)
+delete(y1)
+delete(data_in)
+
+
+
+; now same for 025deg
+
+bf_out= "/media/malle/LaCie1/CLM5_SP_TILES/CRUJRA_FILES_025deg_cru_new/"
+
+bf_all="/media/malle/LaCie1/CLM5_coarse/ch_025deg_SP_CRUJRA_cru_new/lnd_hist/"
+
+;which h? - loop over h0-h3
+h_num_all=asciiread ("h_num_file", -1, "string")
+hfiles = dimsizes (h_num_all)
+do hi = 0, hfiles-1
+   h_num = h_num_all(hi);which h?
+
+   ;this is needed for overall swiss grid:
+
+   ;together with the tiles the simulation name will be determined, needing the following:
+   runID    = "ch_025deg_SP_CRUJRA_cru_new.clm2."+h_num+".2010-01-01-00000.nc"
+   ;followed by:
+   add_file="/"
+
+   infile = bf_all + runID
+   f = addfile (infile, "r")
+
+  gatts = True        ; copy most global attributes
+  copy_VarAtts (f, gatts)   ; indirect for NCL 6.0.0 workaround
+
+  if (isatt (gatts, "tileid")) then ; remove tile ID attribute,
+    delete (gatts@tileid)   ;    no longer singular
+  end if
+
+  time_stamp  = systemfunc ("date") ; add history attribute
+  new_history = time_stamp + ": Tiles joined by " + prog_id
+
+  if (isatt (gatts, "history")) then  ; append to previous history attribute
+    gatts@history = new_history + gatts@history
+  else
+    gatts@history = new_history
+  end if
+
+   ;where to save out files:
+   ;-----------------------------------------------------------
+   ; 1.  Read tile numbers and variables of interest from list file.
+   ;-----------------------------------------------------------
+   variables_all=asciiread ("vars_"+h_num, -1, "string")
+   nvars = dimsizes (variables_all)
+
+   do vi = 0, nvars-1
+      var = variables_all(vi)
+      print(var)
+      x1 = f->$var$&lon    ; read 1-D coordinate vectors
+      y1 = f->$var$&lat
+      data_in = f->$var$
+      time = f->$var$&time    ; read time coords for current file
+      time_dim_name = time!0    ; time dimension name, for later
+
+      outfile = bf_out+var+".nc"
+      print ("")
+      print ("Write output file: " + outfile)
+
+      if (isfilepresent (outfile)) then ; overwrite any previous file
+        system ("rm " + outfile)
+      end if
+
+      out = addfile (outfile, "c")    ; create new output file
+      setfileoption (out, "HeaderReserveSpace", header_space) ; optimize Netcdf-3 output; see NCL docs
+      copy_VarAtts (gatts, out)   ; write global attributes
+
+      dummy_size = -1     ; make the time dimension unlimited
+      opt_unlimited = True
+      filedimdef (out, time_dim_name, dummy_size, opt_unlimited)
+
+      out->DATA = data_in      ; write the main data array last,to improve speed
+      print ("Done.")
+
+      delete(outfile)
+      delete(out)
+
+
+   end do
+  delete(variables_all)
+end do
+
+delete(f)
+delete(x1)
+delete(y1)
+delete(data_in)
+
+
+
+; now same for 05deg
+
+bf_out= "/media/malle/LaCie1/CLM5_SP_TILES/CRUJRA_FILES_05deg_cru_new/"
+
+bf_all="/media/malle/LaCie1/CLM5_coarse/ch_05deg_SP_CRUJRA_cru_new/lnd_hist/"
+
+;which h? - loop over h0-h3
+h_num_all=asciiread ("h_num_file", -1, "string")
+hfiles = dimsizes (h_num_all)
+do hi = 0, hfiles-1
+   h_num = h_num_all(hi);which h?
+
+   ;this is needed for overall swiss grid:
+
+   ;together with the tiles the simulation name will be determined, needing the following:
+   runID    = "ch_05deg_SP_CRUJRA_cru_new.clm2."+h_num+".2010-01-01-00000.nc"
+   ;followed by:
+   add_file="/"
+
+   infile = bf_all + runID
+   f = addfile (infile, "r")
+
+  gatts = True        ; copy most global attributes
+  copy_VarAtts (f, gatts)   ; indirect for NCL 6.0.0 workaround
+
+  if (isatt (gatts, "tileid")) then ; remove tile ID attribute,
+    delete (gatts@tileid)   ;    no longer singular
+  end if
+
+  time_stamp  = systemfunc ("date") ; add history attribute
+  new_history = time_stamp + ": Tiles joined by " + prog_id
+
+  if (isatt (gatts, "history")) then  ; append to previous history attribute
+    gatts@history = new_history + gatts@history
+  else
+    gatts@history = new_history
+  end if
+
+   ;where to save out files:
+   ;-----------------------------------------------------------
+   ; 1.  Read tile numbers and variables of interest from list file.
+   ;-----------------------------------------------------------
+   variables_all=asciiread ("vars_"+h_num, -1, "string")
+   nvars = dimsizes (variables_all)
+
+   do vi = 0, nvars-1
+      var = variables_all(vi)
+      print(var)
+      x1 = f->$var$&lon    ; read 1-D coordinate vectors
+      y1 = f->$var$&lat
+      data_in = f->$var$
+      time = f->$var$&time    ; read time coords for current file
+      time_dim_name = time!0    ; time dimension name, for later
+
+      outfile = bf_out+var+".nc"
+      print ("")
+      print ("Write output file: " + outfile)
+
+      if (isfilepresent (outfile)) then ; overwrite any previous file
+        system ("rm " + outfile)
+      end if
+
+      out = addfile (outfile, "c")    ; create new output file
+      setfileoption (out, "HeaderReserveSpace", header_space) ; optimize Netcdf-3 output; see NCL docs
+      copy_VarAtts (gatts, out)   ; write global attributes
+
+      dummy_size = -1     ; make the time dimension unlimited
+      opt_unlimited = True
+      filedimdef (out, time_dim_name, dummy_size, opt_unlimited)
+
+      out->DATA = data_in      ; write the main data array last,to improve speed
+      print ("Done.")
+
+      delete(outfile)
+      delete(out)
+
+
+   end do
+  delete(variables_all)
+end do
+
+delete(f)
+delete(x1)
+delete(y1)
+delete(data_in)
+
+
+end
+
+exit
