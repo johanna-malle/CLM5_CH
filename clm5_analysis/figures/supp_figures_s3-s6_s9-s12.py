@@ -289,6 +289,19 @@ if __name__ == '__main__':
         fig.savefig(bf_plots / Path('absolute_gpp_snow_ref_' + str(yr_in) + '.png'), dpi=500,
                     bbox_inches='tight', facecolor='white', transparent=False)
 
+        # hexbin plot
+        x1 = snow_oshd1km_HR.where((snow_oshd1km_HR.mask_veg == 1)).data.flatten()
+        y1 = gpp_oshd1km_HR.where((gpp_oshd1km_HR.mask_veg == 1)).data.flatten()
+        id1 = (~np.isnan(x1)) | (~np.isnan(y1))
+
+        fig = plt.figure()
+        ax2 = plt.subplot(111)
+        hb = ax2.hexbin(x1[id1], y1[id1], gridsize=30, mincnt=10, cmap='inferno')
+        cb = fig.colorbar(hb, ax=ax2, label='counts')
+        ax2.set_xlabel('# Days > 2cm Snow')
+        ax2.set_ylabel('GPP$_{JA}$ [gC m$^{-2}$ month$^{-1}$]')
+        fig.savefig(Path(r'C:\Users\malle\Documents\paper_clm5_ch\fig_s9_hexbin.pdf'), transparent=True)
+
         # look at snow days b/w january and june Diffs
         string_units = 'no. days w/ >2cm snow Jan-Jun'
         string_save = 'snow_days_jan_june_'
