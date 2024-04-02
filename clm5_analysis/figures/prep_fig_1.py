@@ -34,8 +34,12 @@ lat_geo = input_global.LATIXY[:, 0]
 lon_geo = input_global.LONGXY[0, :]
 input_global = input_global.assign_coords({'lsmlon': lon_geo.data, 'lsmlat': lat_geo.data})
 input_highres = input_highres.assign_coords({'lsmlon': lon_geo.data, 'lsmlat': lat_geo.data})
-veg_global = input_global.PCT_NATVEG.where(domain.mask.data, np.nan)
-veg_highres = input_highres.PCT_NATVEG.where(domain.mask.data, np.nan)
+pct_nat_pft = input_global.PCT_NAT_PFT.where(input_global.PCT_NAT_PFT.natpft != 0, np.nan).sum(dim='natpft')
+pct_nat_veg = input_global.PCT_NATVEG
+veg_global = (pct_nat_pft * (0.01*pct_nat_veg)).where(domain.mask.data, np.nan)
+pct_nat_pft = input_highres.PCT_NAT_PFT.where(input_global.PCT_NAT_PFT.natpft != 0, np.nan).sum(dim='natpft')
+pct_nat_veg = input_highres.PCT_NATVEG
+veg_highres = (pct_nat_pft * (0.01*pct_nat_veg)).where(domain.mask.data, np.nan)
 
 input_crujra = xr.open_dataset(base_dir / 'clmforc.crujra.TQ.2018-05.nc')
 month_avg_cru = input_crujra.mean(dim='time')
