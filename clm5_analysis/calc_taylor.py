@@ -6,6 +6,8 @@ Created on 30.01.24 10:27
 """
 
 from pathlib import Path
+
+import pandas as pd
 import xarray as xr
 import glob
 import matplotlib.lines as mlines
@@ -31,7 +33,6 @@ bf_oshd = bf / 'FSM_new/analysed_grid_python_out'
 all_FSM = xr.open_mfdataset(glob.glob(str(bf_oshd / '*025*')))
 
 bf_out = bf / 'figures_revisions'
-
 
 FSM_feb = all_FSM.isel(time=(all_FSM.time.dt.month == 2) & (all_FSM.time.dt.day == 1))
 FSM_apr = all_FSM.isel(time=(all_FSM.time.dt.month == 4) & (all_FSM.time.dt.day == 1))
@@ -194,6 +195,20 @@ ccoef_apr = np.array(ccoef_apr)
 ccoef_dec = np.array(ccoef_dec)
 
 
+col_label = ['FSM', 'ClimCRU0.5', 'ClimCRU0.5', 'ClimOSHD0.5', 'ClimCRU0.25', 'ClimCRU*0.25', 'ClimOSHD0.25',
+            'ClimCRU1kmLUGl', 'ClimCRU1kmLUHR', 'ClimCRU*1kmLUGl', 'ClimCRU*1kmLUHR',
+            'ClimOSHD1kmLUGl', 'ClimOSHD1kmLUHR']
+metrics_all = pd.DataFrame({'std_dec': sdev_dec, 'std_feb': sdev_feb, 'std_apr': sdev_apr,
+                            'crmsd_dec': crmsd_dec, 'crmsd_feb': crmsd_feb, 'crmsd_apr': crmsd_apr,
+                            'ccoef_dec': ccoef_dec, 'ccoef_feb': ccoef_feb, 'ccoef_apr': ccoef_apr})
+
+metrics_all['names_in'] = col_label
+metrics_all.set_index('names_in', inplace=True)
+metrics_all = metrics_all.transpose()
+metrics_all = metrics_all.round(3)
+metrics_all.to_csv(bf_out / 'taylor_metrics.csv')
+
+
 LEGEND_SUBPLOT = (0, 3)
 
 SUBPLOTS_DATA = [
@@ -234,8 +249,8 @@ SUBPLOTS_DATA = [
             label_in[8]: (sdev_feb[8], crmsd_feb[8], ccoef_feb[8]),
             label_in[9]: (sdev_feb[9], crmsd_feb[9], ccoef_feb[9]),
             label_in[10]: (sdev_feb[10], crmsd_feb[10], ccoef_feb[10]),
-            label_in[11]: (ccoef_feb[11], ccoef_feb[11], ccoef_feb[11]),
-            label_in[12]: (ccoef_feb[12], ccoef_feb[12], ccoef_feb[12])
+            label_in[11]: (sdev_feb[11], crmsd_feb[11], ccoef_feb[11]),
+            label_in[12]: (sdev_feb[12], crmsd_feb[12], ccoef_feb[12])
         }
     }, {
         "axis_idx": (0, 2),
@@ -254,17 +269,20 @@ SUBPLOTS_DATA = [
             label_in[8]: (sdev_apr[8], crmsd_apr[8], ccoef_apr[8]),
             label_in[9]: (sdev_apr[9], crmsd_apr[9], ccoef_apr[9]),
             label_in[10]: (sdev_apr[10], crmsd_apr[10], ccoef_apr[10]),
-            label_in[11]: (ccoef_apr[11], ccoef_apr[11], ccoef_apr[11]),
-            label_in[12]: (ccoef_apr[12], ccoef_apr[12], ccoef_apr[12])
+            label_in[11]: (sdev_apr[11], crmsd_apr[11], ccoef_apr[11]),
+            label_in[12]: (sdev_apr[12], crmsd_apr[12], ccoef_apr[12])
         }
     }
 ]
 
-existing_colors = [(217/255, 95/255, 2/255), (217/255, 95/255, 2/255), (117/255, 112/255, 179/255),
-                   (1.0, 1.0, 1.0), (0.0, 0.0, 0.0)]
-N = 6
-col_in = distinctipy.get_colors(N, existing_colors, colorblind_type="Deuteranomaly")
+# existing_colors = [(217/255, 95/255, 2/255), (27/255, 158/255, 119/255), (117/255, 112/255, 179/255),
+#                   (1.0, 1.0, 1.0), (0.0, 0.0, 0.0)]
+# N = 6
+# col_in = distinctipy.get_colors(N, existing_colors, colorblind_type="Deuteranomaly")
 # get colors which are as different as possible (also for colorblind)
+col_cru = (217/255, 95/255, 2/255)
+col_cruL = (117/255, 112/255, 179/255)
+col_oshd = (27/255, 158/255, 119/255)
 
 MARKERS = {
     label_in[0]: {
@@ -276,80 +294,80 @@ MARKERS = {
     label_in[1]: {
         "marker": "o",
         "color_edge": 'grey',
-        "color_face": col_in[0],
-        "markersize": 9
+        "color_face": col_cru,
+        "alpha": 0.8,
+        "markersize": 8
     },
     label_in[2]: {
         "marker": "o",
         "color_edge": "grey",
-        "color_face": col_in[1],
-        "markersize": 9
+        "color_face": col_cruL,
+        "alpha": 0.5,
+        "markersize": 8
     },
     label_in[3]: {
         "marker": "o",
         "color_edge": "grey",
-        "color_face": col_in[2],
-        "markersize": 9
+        "color_face": col_oshd,
+        "markersize": 8
     },
     label_in[4]: {
         "marker": "v",
         "color_edge": "grey",
-        "color_face": col_in[3],
-        "markersize": 9
+        "color_face": col_cru,
+        "markersize": 8
     },
     label_in[5]: {
         "marker": "v",
         "color_edge": "grey",
-        "color_face": col_in[4],
-        "markersize": 9
+        "color_face": col_cruL,
+        "markersize": 8
     },
     label_in[6]: {
         "marker": "v",
         "color_edge": "grey",
-        "color_face": col_in[5],
-        "markersize": 9
+        "color_face": col_oshd,
+        "markersize": 8
     },
     label_in[7]: {
         "marker": "d",
         "color_edge": "grey",
-        "color_face": (217/255, 95/255, 2/255),
-        "markersize": 9
+        "color_face": col_cru,
+        "markersize": 8
     },
     label_in[8]: {
         "marker": "*",
         "color_edge": "black",
-        "color_face": (217/255, 95/255, 2/255),
+        "color_face": col_cru,
         "markersize": 10
     },
     label_in[9]: {
         "marker": "d",
         "color_edge": "grey",
-        "color_face": (117/255, 112/255, 179/255),
-        "markersize": 9
+        "color_face": col_cruL,
+        "markersize": 8
     },
     label_in[10]: {
         "marker": "*",
         "color_edge": "black",
-        "color_face": (117/255, 112/255, 179/255),
+        "color_face": col_cruL,
         "markersize": 10
     },
     label_in[11]: {
         "marker": "d",
         "color_edge": "grey",
-        "color_face": (27/255, 158/255, 119/255),
-        "markersize": 9
+        "color_face": col_oshd,
+        "markersize": 8
     },
     label_in[12]: {
         "marker": "*",
         "color_edge": "black",
-        "color_face": (27/255, 158/255, 119/255),
+        "color_face": col_oshd,
         "markersize": 10
     }
 }
 
-
 # ## PLOT STYLE ################################################################# #
-
 FONT_FAMILY = 'sans-serif'
 FONT_SIZE = 10
 # specify some styles for the correlation component
@@ -369,15 +387,13 @@ COLS_STD = {
 
 # specify some styles for the root mean square deviation
 STYLES_RMS = {
-    'color': '#9696e0',
+    'color': '#06064f',
     'linestyle': '--',
-    'widthRMS': 1.8
+    'widthRMS': 1.6
 }
 
 plt.rcParams.update({'font.size': FONT_SIZE, 'font.family': FONT_FAMILY})
-
 intervalsCOR = np.concatenate((np.arange(0, 1.0, 0.2), [0.9, 0.95, 0.99, 1]))
-
 
 # create figure with 2 lines and 3 columns
 fig_size = (12, 4)
@@ -523,6 +539,4 @@ del ax, legend_handles
 # avoid some overlapping
 plt.tight_layout()
 
-
-bf_out = bf / 'figures_revisions'
 fig.savefig(bf_out / 'taylor_upscaled.png', transparent=False, bbox_inches='tight')
