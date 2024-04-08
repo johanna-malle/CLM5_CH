@@ -13,6 +13,7 @@ import os
 import seaborn as sns
 import matplotlib
 import glob
+import platform
 
 
 def mae(y_true, predictions):
@@ -28,13 +29,20 @@ def rmse(y_true, predictions):
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
 
-bf = Path('/home/lud11/malle/CLM5_CH')
 
-path_FSM = '/home/lud11/malle/CLM5_CH/FSM_new/analysed_points'
+if platform.system() == 'Windows':
+    bf = Path('L:\malle\CLM5_CH')
+else:
+    bf = Path('/home/lud11/malle/CLM5_CH')
+
+
+path_FSM = bf / 'FSM_new' / 'analysed_points'
 all_files = glob.glob(os.path.join(path_FSM, "*.csv"))  # just do this once to get all ids
-all_locs_comp = list((f.split('/')[-1]).split('_')[1] for f in all_files)
 # if windows:
-# all_locs_comp = list((f.split('\\')[-1]).split('_')[1] for f in all_files)
+if platform.system() == 'Windows':
+    all_locs_comp = list((f.split('\\')[-1]).split('_')[1] for f in all_files)
+else:
+    all_locs_comp = list((f.split('/')[-1]).split('_')[1] for f in all_files)
 
 K = "MAE2"
 K1 = "5DO"
@@ -50,15 +58,19 @@ path_crujra_nofor = bf / 'PTCLM5_nofor' / 'PTCLM5_nofor_CRU_Nolapse'
 path_oshd_nofor = bf / 'PTCLM5_nofor' / 'PTCLM5_nofor_OSHD'
 
 
-bf_meas = Path('/home/lud11/malle/CLM5_CH/dvd_oshd')
+bf_meas = bf / 'dvd_oshd'
 all_data_1000 = pd.DataFrame([])
 all_data_2000 = pd.DataFrame([])
 all_data_3000 = pd.DataFrame([])
 
 # Read each CSV file in dir "path/to/root_dir"
 all_elev = glob.glob(os.path.join(path_FSM, "*.csv"))
-all_names_elev = list((f.split('/')[-1]).split('_')[1] for f in all_elev)
-all_elev_elev = list((f.split('/')[-1]).split('_')[-1].split('.')[0] for f in all_elev)
+if platform.system() == 'Windows':
+    all_names_elev = list((f.split('\\')[-1]).split('_')[1] for f in all_elev)
+    all_elev_elev = list((f.split('\\')[-1]).split('_')[-1].split('.')[0] for f in all_elev)
+else:
+    all_names_elev = list((f.split('/')[-1]).split('_')[1] for f in all_elev)
+    all_elev_elev = list((f.split('/')[-1]).split('_')[-1].split('.')[0] for f in all_elev)
 all_elev_elev = list(map(int, all_elev_elev))
 elev_comp = list(zip(all_names_elev, all_elev_elev))
 
@@ -72,6 +84,7 @@ for locs in all_locs:
     meas_in = pd.read_csv(glob.glob(os.path.join(bf_meas, "*" + locs + "*.csv"))[0]).set_index('time_HS_meas')
     meas_in = meas_in.loc[~meas_in.index.duplicated(keep='first')] # this is necessary since some seasons overlapped..
     meas_in.set_index(pd.to_datetime(meas_in.index), inplace=True)
+    meas_in.dropna(inplace=True)
 
     print(locs)
     name_out = bf / 'snow_comp' / Path('station_'+locs+'_nov_may.csv')
@@ -90,11 +103,11 @@ for locs in all_locs:
     crujraP_origSurf = pd.read_csv(glob.glob(os.path.join(path_crujraP_origSurf,
                                                           "*"+locs+"*.csv"))[0]).set_index('timeyears_clm')
     crujraP_nofor = pd.read_csv(glob.glob(os.path.join(path_crujraP_nofor,
-                                                          "*"+locs+"*.csv"))[0]).set_index('timeyears_clm')
+                                                       "*"+locs+"*.csv"))[0]).set_index('timeyears_clm')
     crujra_nofor = pd.read_csv(glob.glob(os.path.join(path_crujra_nofor,
-                                                          "*"+locs+"*.csv"))[0]).set_index('timeyears_clm')
+                                                      "*"+locs+"*.csv"))[0]).set_index('timeyears_clm')
     oshd_nofor = pd.read_csv(glob.glob(os.path.join(path_oshd_nofor,
-                                                          "*"+locs+"*.csv"))[0]).set_index('timeyears_clm')
+                                                    "*"+locs+"*.csv"))[0]).set_index('timeyears_clm')
 
     oshd_newSurf.set_index(pd.to_datetime(oshd_newSurf.index), inplace=True)
     oshd_origSurf.set_index(pd.to_datetime(oshd_origSurf.index), inplace=True)
@@ -122,7 +135,8 @@ for locs in all_locs:
     FSM.set_index('time_stamp_comp', inplace=True)
     FSM.drop(['time_stamps_jim', 'scf_jim', 'SWE_jim'], axis=1, inplace=True)
     time_filter = pd.to_datetime(FSM.index)
-    FSM1 = FSM[((time_filter.month < 6) | (time_filter.month > 10)) & (time_filter.year < 2021)]  # only comp. nov-may
+    FSM1 = FSM[((time_filter.month < 8) | (time_filter.month > 9)) & (time_filter.year < 2021)]  # only comp. oct-june
+    # FSM1 = FSM[(time_filter.year < 2021)]  # only comp. oct-june
     FSM1.set_index(pd.to_datetime(FSM1.index), inplace=True)
 
     result_all = pd.concat([result, FSM1], axis=1, join='inner')
@@ -229,8 +243,6 @@ df_3000 = pd.concat(dfs_3000)
 
 plt.rc('font', family='serif')
 
-########################################################################################################
-
 fig = plt.figure(figsize=(12, 12))
 my_pal = {"diff_cru_orig": (217/255, 95/255, 2/255), "diff_cru_new": (217/255, 95/255, 2/255),
           "diff_cru_nofor": (217/255, 95/255, 2/255),
@@ -241,14 +253,18 @@ my_pal = {"diff_cru_orig": (217/255, 95/255, 2/255), "diff_cru_new": (217/255, 9
 
 flierprops = dict(marker='o', markersize=4.5, markeredgecolor='gray', markerfacecolor='silver', alpha=0.45)
 axes = fig.add_subplot(311)
-ax = sns.boxplot(data=np.abs(df_1000[['diff_cru_orig', 'diff_cru_new', 'diff_cru_nofor',
-                                      'diff_cruP_orig', 'diff_cruP_new', 'diff_cruP_nofor',
-                                      'diff_oshd_orig', 'diff_oshd_new', 'diff_oshd_nofor', 'FSM']]), ax=axes, palette=my_pal,
-                 flierprops=flierprops, linewidth=1.6, saturation=0.8, showfliers=False)
-axes.set_title(r"$\bf{(a)}$"+' Locations < 1000m', loc='left', fontsize=16)
+ax = sns.boxplot(data=(df_1000[['diff_cru_orig', 'diff_cru_new', 'diff_cru_nofor', 'diff_cruP_orig', 'diff_cruP_new',
+                                'diff_cruP_nofor', 'diff_oshd_orig', 'diff_oshd_new', 'diff_oshd_nofor', 'FSM']]),
+                 ax=axes, palette=my_pal, flierprops=flierprops, linewidth=1.6, saturation=0.8, showfliers=False,
+                 meanprops={"marker": "o", "markerfacecolor": "white", "markeredgecolor": "black", "markersize": "6"},
+                 medianprops=dict(color="grey", alpha=0.85, linewidth=1.9, linestyle='-'), showmeans=True)
+axes.set_title(r"$\bf{(a)}$"+' Locations < 1000m (n = '+str(len(less_1000))+')', loc='left', fontsize=16)
+axes.set_ylim([-2.1, 2.1])
 axes.yaxis.grid(True)
 axes.set_xticklabels([])
 axes.set_ylabel(u'Δ HS [m] ', fontsize=14)
+ax.axhline(0, color='k', linewidth=2.5)
+
 for label in (axes.get_xticklabels() + axes.get_yticklabels()):
     label.set_fontsize(13)
 
@@ -260,62 +276,66 @@ for patch in ax.patches[2:-1:3]:
     r, g, b, a = patch.get_facecolor()
     patch.set_facecolor((r, g, b, 0.2))
 
-plt.text(0.04, 0.55, 'RMSE='+str(rmse_1000.crujra_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.055, 0.55, 'MAE='+str(mae_1000.crujra_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.015, 0.08, 'RMSE='+str(rmse_1000.crujra_origSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.015, 0.02, 'MAE='+str(mae_1000.crujra_origSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
 
-plt.text(0.14, 0.5, 'RMSE='+str(rmse_1000.crujra_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.155, 0.5, 'MAE='+str(mae_1000.crujra_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.115, 0.08, 'RMSE='+str(rmse_1000.crujra_newSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.115, 0.02, 'MAE='+str(mae_1000.crujra_newSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
 
-plt.text(0.24, 0.58, 'RMSE='+str(rmse_1000.crujra_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.26, 0.58, 'MAE='+str(mae_1000.crujra_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.22, 0.08, 'RMSE='+str(rmse_1000.crujra_nofor.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.22, 0.02, 'MAE='+str(mae_1000.crujra_nofor.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
 
-plt.text(0.345, 0.3, 'RMSE='+str(rmse_1000.crujraP_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.365, 0.3, 'MAE='+str(mae_1000.crujraP_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.32, 0.08, 'RMSE='+str(rmse_1000.crujraP_origSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.32, 0.02, 'MAE='+str(mae_1000.crujraP_origSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
 
-plt.text(0.445, 0.31, 'RMSE='+str(rmse_1000.crujraP_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.46, 0.31, 'MAE='+str(mae_1000.crujraP_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.42, 0.08, 'RMSE='+str(rmse_1000.crujraP_newSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.42, 0.02, 'MAE='+str(mae_1000.crujraP_newSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
 
-plt.text(0.53, 0.37, 'RMSE='+str(rmse_1000.crujraP_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.545, 0.37, 'MAE='+str(mae_1000.crujraP_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.52, 0.08, 'RMSE='+str(rmse_1000.crujraP_nofor.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.52, 0.02, 'MAE='+str(mae_1000.crujraP_nofor.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
 
-plt.text(0.64, 0.25, 'RMSE='+str(rmse_1000.oshd_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.655, 0.25, 'MAE='+str(mae_1000.oshd_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.625, 0.08, 'RMSE='+str(rmse_1000.oshd_origSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.625, 0.02, 'MAE='+str(mae_1000.oshd_origSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
 
-plt.text(0.735, 0.25, 'RMSE='+str(rmse_1000.oshd_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.75, 0.25, 'MAE='+str(mae_1000.oshd_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.725, 0.08, 'RMSE='+str(rmse_1000.oshd_newSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.725, 0.02, 'MAE='+str(mae_1000.oshd_newSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
 
-plt.text(0.84, 0.25, 'RMSE='+str(rmse_1000.oshd_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.855, 0.25, 'MAE='+str(mae_1000.oshd_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.82, 0.08, 'RMSE='+str(rmse_1000.oshd_nofor.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.82, 0.02, 'MAE='+str(mae_1000.oshd_nofor.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
 
-plt.text(0.93, 0.25, 'RMSE='+str(rmse_1000.HS_jim.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.945, 0.25, 'MAE='+str(mae_1000.HS_jim.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.915, 0.08, 'RMSE='+str(rmse_1000.HS_jim.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.915, 0.02, 'MAE='+str(mae_1000.HS_jim.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
 
 axes = fig.add_subplot(312)
-ax = sns.boxplot(data=np.abs(df_2000[['diff_cru_orig', 'diff_cru_new', 'diff_cru_nofor',
-                                      'diff_cruP_orig', 'diff_cruP_new', 'diff_cruP_nofor',
-                                      'diff_oshd_orig', 'diff_oshd_new', 'diff_oshd_nofor', 'FSM']]), ax=axes, palette=my_pal,
-                 flierprops=flierprops, linewidth=1.6, saturation=0.8, showfliers=False)
-axes.set_title(r"$\bf{(b)}$"+' Locations 1000-2000m', loc='left', fontsize=16)
+ax = sns.boxplot(data=(df_2000[['diff_cru_orig', 'diff_cru_new', 'diff_cru_nofor', 'diff_cruP_orig', 'diff_cruP_new',
+                                'diff_cruP_nofor', 'diff_oshd_orig', 'diff_oshd_new', 'diff_oshd_nofor', 'FSM']]),
+                 ax=axes, palette=my_pal, flierprops=flierprops, linewidth=1.6, saturation=0.8, showfliers=False,
+                 meanprops={"marker": "o", "markerfacecolor": "white", "markeredgecolor": "black", "markersize": "6"},
+                 medianprops=dict(color="grey", alpha=0.85, linewidth=1.9, linestyle='-'), showmeans=True)
+ax.axhline(0, color='k', linewidth=2.5)
+axes.set_ylim([-2.1, 2.1])
+
+axes.set_title(r"$\bf{(b)}$"+' Locations 1000-2000m (n = '+str(len(bw_1000_2000))+')', loc='left', fontsize=16)
 axes.yaxis.grid(True)
 axes.set_ylabel(u'Δ HS [m] ', fontsize=14)
 axes.set_xticklabels([])
@@ -330,74 +350,74 @@ for patch in ax.patches[2:-1:3]:
     r, g, b, a = patch.get_facecolor()
     patch.set_facecolor((r, g, b, 0.2))
 
+plt.text(0.015, 0.08, 'RMSE='+str(rmse_2000.crujra_origSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.015, 0.02, 'MAE='+str(mae_2000.crujra_origSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
 
-################################################################
-plt.text(0.04, 0.55, 'RMSE='+str(rmse_2000.crujra_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.055, 0.55, 'MAE='+str(mae_2000.crujra_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.115, 0.08, 'RMSE='+str(rmse_2000.crujra_newSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.115, 0.02, 'MAE='+str(mae_2000.crujra_newSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
 
-plt.text(0.14, 0.5, 'RMSE='+str(rmse_2000.crujra_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.155, 0.5, 'MAE='+str(mae_2000.crujra_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.22, 0.08, 'RMSE='+str(rmse_2000.crujra_nofor.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.22, 0.02, 'MAE='+str(mae_2000.crujra_nofor.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
 
-plt.text(0.24, 0.58, 'RMSE='+str(rmse_2000.crujra_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.26, 0.58, 'MAE='+str(mae_2000.crujra_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.32, 0.08, 'RMSE='+str(rmse_2000.crujraP_origSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.32, 0.02, 'MAE='+str(mae_2000.crujraP_origSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
 
-plt.text(0.345, 0.3, 'RMSE='+str(rmse_2000.crujraP_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.365, 0.3, 'MAE='+str(mae_2000.crujraP_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.42, 0.08, 'RMSE='+str(rmse_2000.crujraP_newSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.42, 0.02, 'MAE='+str(mae_2000.crujraP_newSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
 
-plt.text(0.445, 0.31, 'RMSE='+str(rmse_2000.crujraP_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.46, 0.31, 'MAE='+str(mae_2000.crujraP_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.52, 0.08, 'RMSE='+str(rmse_2000.crujraP_nofor.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.52, 0.02, 'MAE='+str(mae_2000.crujraP_nofor.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
 
-plt.text(0.53, 0.37, 'RMSE='+str(rmse_2000.crujraP_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.545, 0.37, 'MAE='+str(mae_2000.crujraP_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.625, 0.08, 'RMSE='+str(rmse_2000.oshd_origSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.625, 0.02, 'MAE='+str(mae_2000.oshd_origSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
 
-plt.text(0.64, 0.25, 'RMSE='+str(rmse_2000.oshd_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.655, 0.25, 'MAE='+str(mae_2000.oshd_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.725, 0.08, 'RMSE='+str(rmse_2000.oshd_newSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.725, 0.02, 'MAE='+str(mae_2000.oshd_newSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
 
-plt.text(0.735, 0.25, 'RMSE='+str(rmse_2000.oshd_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.75, 0.25, 'MAE='+str(mae_2000.oshd_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
+plt.text(0.82, 0.08, 'RMSE='+str(rmse_2000.oshd_nofor.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.82, 0.02, 'MAE='+str(mae_2000.oshd_nofor.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
 
-plt.text(0.84, 0.25, 'RMSE='+str(rmse_2000.oshd_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.855, 0.25, 'MAE='+str(mae_2000.oshd_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.93, 0.25, 'RMSE='+str(rmse_2000.HS_jim.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.945, 0.25, 'MAE='+str(mae_2000.HS_jim.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-################################################################
+plt.text(0.915, 0.08, 'RMSE='+str(rmse_2000.HS_jim.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.915, 0.02, 'MAE='+str(mae_2000.HS_jim.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
 
 axes = fig.add_subplot(313)
-ax = sns.boxplot(data=np.abs(df_3000[['diff_cru_orig', 'diff_cru_new', 'diff_cru_nofor',
-                                      'diff_cruP_orig', 'diff_cruP_new', 'diff_cruP_nofor',
-                                      'diff_oshd_orig', 'diff_oshd_new', 'diff_oshd_nofor', 'FSM']]), ax=axes, palette=my_pal,
-                 flierprops=flierprops, linewidth=1.6, saturation=0.8, showfliers=False)
-axes.set_title(r"$\bf{(c)}$"+' Locations > 2000m', loc='left', fontsize=16)
+ax = sns.boxplot(data=(df_3000[['diff_cru_orig', 'diff_cru_new', 'diff_cru_nofor', 'diff_cruP_orig', 'diff_cruP_new',
+                                'diff_cruP_nofor', 'diff_oshd_orig', 'diff_oshd_new', 'diff_oshd_nofor', 'FSM']]),
+                 ax=axes, palette=my_pal, flierprops=flierprops, linewidth=1.6, saturation=0.8, showfliers=False,
+                 meanprops={"marker": "o", "markerfacecolor": "white", "markeredgecolor": "black", "markersize": "6"},
+                 medianprops=dict(color="grey", alpha=0.85, linewidth=1.9, linestyle='-'), showmeans=True)
+ax.axhline(0, color='k', linewidth=2.5)
+
+axes.set_title(r"$\bf{(c)}$"+' Locations > 2000m (n = '+str(len(above_2000))+')', loc='left', fontsize=16)
 axes.yaxis.grid(True)
 axes.set_ylabel(u'Δ HS [m] ', fontsize=14)
 for label in (axes.get_xticklabels() + axes.get_yticklabels()):
     label.set_fontsize(13)
-axes.set_xticklabels([r'Clim$_{CRU 1km}$+LU$_{Gl 1km}$', 'Clim$_{CRU 1km}$+LU$_{HR 1km}$', 'Clim$_{CRU 1km}$+LU$_{nofor}$',
-                      r"Clim$_{CRU^{*} 1km}$+LU$_{Gl 1km}$", "Clim$_{CRU^{*} 1km}$+LU$_{HR 1km}$", "Clim$_{CRU^{*} 1km}$+LU$_{nofor}$",
-                      "Clim$_{OSHD 1km}$+LU$_{Gl 1km}$", "Clim$_{OSHD 1km}$+LU$_{HR 1km}$", "Clim$_{OSHD 1km}$+LU$_{nofor}$",
-                      "Ref. (FSM2)"],
-                     rotation=20, ha='right')
+axes.set_xticklabels([r'Clim$_{CRU^{pt}}$+LU$_{Gl}$', 'Clim$_{CRU^{pt}}$+LU$_{HR}$', 'Clim$_{CRU^{pt}}$+LU$_{nofor}$',
+                      "Clim$_{CRU*^{pt}}$+LU$_{Gl}$", "Clim$_{CRU*^{pt}}$+LU$_{HR}$", "Clim$_{CRU*^{pt}}$+LU$_{nofor}$",
+                      "Clim$_{OSHD^{pt}}$+LU$_{Gl}$", "Clim$_{OSHD^{pt}}$+LU$_{HR}$", "Clim$_{OSHD^{pt}}$+LU$_{nofor}$",
+                      "Ref. (FSM2)"], rotation=20, ha='right')
+axes.set_ylim([-2.1, 2.1])
 
 for patch in ax.patches[1:-1:3]:
     r, g, b, a = patch.get_facecolor()
@@ -407,302 +427,47 @@ for patch in ax.patches[2:-1:3]:
     r, g, b, a = patch.get_facecolor()
     patch.set_facecolor((r, g, b, 0.2))
 
-################################################################
-plt.text(0.04, 0.55, 'RMSE='+str(rmse_3000.crujra_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.055, 0.55, 'MAE='+str(mae_3000.crujra_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.14, 0.5, 'RMSE='+str(rmse_3000.crujra_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.155, 0.5, 'MAE='+str(mae_3000.crujra_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.24, 0.58, 'RMSE='+str(rmse_3000.crujra_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.26, 0.58, 'MAE='+str(mae_3000.crujra_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.345, 0.3, 'RMSE='+str(rmse_3000.crujraP_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.365, 0.3, 'MAE='+str(mae_3000.crujraP_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.445, 0.31, 'RMSE='+str(rmse_3000.crujraP_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.46, 0.31, 'MAE='+str(mae_3000.crujraP_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.53, 0.37, 'RMSE='+str(rmse_3000.crujraP_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.545, 0.37, 'MAE='+str(mae_3000.crujraP_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.64, 0.25, 'RMSE='+str(rmse_3000.oshd_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.655, 0.25, 'MAE='+str(mae_3000.oshd_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.735, 0.25, 'RMSE='+str(rmse_3000.oshd_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.75, 0.25, 'MAE='+str(mae_3000.oshd_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.84, 0.25, 'RMSE='+str(rmse_3000.oshd_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.855, 0.25, 'MAE='+str(mae_3000.oshd_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.93, 0.25, 'RMSE='+str(rmse_3000.HS_jim.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.945, 0.25, 'MAE='+str(mae_3000.HS_jim.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-################################################################
-
+plt.text(0.015, 0.08, 'RMSE='+str(rmse_3000.crujra_origSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.015, 0.02, 'MAE='+str(mae_3000.crujra_origSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.115, 0.08, 'RMSE='+str(rmse_3000.crujra_newSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.115, 0.02, 'MAE='+str(mae_3000.crujra_newSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.22, 0.08, 'RMSE='+str(rmse_3000.crujra_nofor.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.22, 0.02, 'MAE='+str(mae_3000.crujra_nofor.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.32, 0.08, 'RMSE='+str(rmse_3000.crujraP_origSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.32, 0.02, 'MAE='+str(mae_3000.crujraP_origSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.42, 0.08, 'RMSE='+str(rmse_3000.crujraP_newSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.42, 0.02, 'MAE='+str(mae_3000.crujraP_newSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.52, 0.08, 'RMSE='+str(rmse_3000.crujraP_nofor.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.52, 0.02, 'MAE='+str(mae_3000.crujraP_nofor.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.625, 0.08, 'RMSE='+str(rmse_3000.oshd_origSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.625, 0.02, 'MAE='+str(mae_3000.oshd_origSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.725, 0.08, 'RMSE='+str(rmse_3000.oshd_newSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.725, 0.02, 'MAE='+str(mae_3000.oshd_newSurf.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.82, 0.08, 'RMSE='+str(rmse_3000.oshd_nofor.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.82, 0.02, 'MAE='+str(mae_3000.oshd_nofor.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.915, 0.08, 'RMSE='+str(rmse_3000.HS_jim.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
+plt.text(0.915, 0.02, 'MAE='+str(mae_3000.HS_jim.values[0])+'m', rotation=0, ha='left', va='bottom',
+         transform=axes.transAxes, fontsize=8.3)
 plt.tight_layout()
-fig.savefig(bf / 'ptclm5_comp_boxplot_abs_revision.png', facecolor='white', transparent=False, bbox_inches='tight')
-fig.savefig(bf / 'ptclm5_comp_boxplot_abs_revision.pdf', transparent=True)
+fig.savefig(bf / 'fig_2_revision.png', facecolor='white', transparent=False, bbox_inches='tight')
+# fig.savefig(bf / 'ptclm5_comp_boxplot_revision.pdf', transparent=True)
 
-
-########################################################################################################
-
-fig = plt.figure(figsize=(12, 12))
-my_pal = {"diff_cru_orig": (217/255, 95/255, 2/255), "diff_cru_new": (217/255, 95/255, 2/255),
-          "diff_cru_nofor": (217/255, 95/255, 2/255),
-          "diff_cruP_orig": (117/255, 112/255, 179/255), "diff_cruP_new": (117/255, 112/255, 179/255),
-          "diff_cruP_nofor": (117/255, 112/255, 179/255),
-          "diff_oshd_orig": (27/255, 158/255, 119/255), "diff_oshd_new": (27/255, 158/255, 119/255),
-          "diff_oshd_nofor": (27/255, 158/255, 119/255), "FSM": "dimgray"}
-
-flierprops = dict(marker='o', markersize=4.5, markeredgecolor='gray', markerfacecolor='silver', alpha=0.45)
-axes = fig.add_subplot(311)
-ax = sns.boxplot(data=(df_1000[['diff_cru_orig', 'diff_cru_new', 'diff_cru_nofor',
-                                      'diff_cruP_orig', 'diff_cruP_new', 'diff_cruP_nofor',
-                                      'diff_oshd_orig', 'diff_oshd_new', 'diff_oshd_nofor', 'FSM']]), ax=axes, palette=my_pal,
-                 flierprops=flierprops, linewidth=1.6, saturation=0.8, showfliers=False, meanprops={"marker": "o", "markerfacecolor": "white", "markeredgecolor": "black", "markersize": "6"},
-                 medianprops=dict(color="grey", alpha=0.85, linewidth=1.9, linestyle='-'), showmeans=True)
-axes.set_title(r"$\bf{(a)}$"+' Locations < 1000m', loc='left', fontsize=16)
-axes.yaxis.grid(True)
-axes.set_xticklabels([])
-axes.set_ylabel(u'Δ HS [m] ', fontsize=14)
-ax.axhline(0, color='k', linewidth=2.5)
-
-for label in (axes.get_xticklabels() + axes.get_yticklabels()):
-    label.set_fontsize(13)
-
-for patch in ax.patches[1:-1:3]:
-    r, g, b, a = patch.get_facecolor()
-    patch.set_facecolor((r, g, b, 0.6))
-
-for patch in ax.patches[2:-1:3]:
-    r, g, b, a = patch.get_facecolor()
-    patch.set_facecolor((r, g, b, 0.2))
-
-plt.text(0.04, 0.55, 'RMSE='+str(rmse_1000.crujra_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.055, 0.55, 'MAE='+str(mae_1000.crujra_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.14, 0.5, 'RMSE='+str(rmse_1000.crujra_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.155, 0.5, 'MAE='+str(mae_1000.crujra_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.24, 0.58, 'RMSE='+str(rmse_1000.crujra_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.26, 0.58, 'MAE='+str(mae_1000.crujra_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.345, 0.3, 'RMSE='+str(rmse_1000.crujraP_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.365, 0.3, 'MAE='+str(mae_1000.crujraP_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.445, 0.31, 'RMSE='+str(rmse_1000.crujraP_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.46, 0.31, 'MAE='+str(mae_1000.crujraP_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.53, 0.37, 'RMSE='+str(rmse_1000.crujraP_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.545, 0.37, 'MAE='+str(mae_1000.crujraP_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.64, 0.25, 'RMSE='+str(rmse_1000.oshd_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.655, 0.25, 'MAE='+str(mae_1000.oshd_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.735, 0.25, 'RMSE='+str(rmse_1000.oshd_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.75, 0.25, 'MAE='+str(mae_1000.oshd_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.84, 0.25, 'RMSE='+str(rmse_1000.oshd_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.855, 0.25, 'MAE='+str(mae_1000.oshd_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.93, 0.25, 'RMSE='+str(rmse_1000.HS_jim.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.945, 0.25, 'MAE='+str(mae_1000.HS_jim.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-axes = fig.add_subplot(312)
-ax = sns.boxplot(data=(df_2000[['diff_cru_orig', 'diff_cru_new', 'diff_cru_nofor',
-                                      'diff_cruP_orig', 'diff_cruP_new', 'diff_cruP_nofor',
-                                      'diff_oshd_orig', 'diff_oshd_new', 'diff_oshd_nofor', 'FSM']]), ax=axes, palette=my_pal,
-                 flierprops=flierprops, linewidth=1.6, saturation=0.8, showfliers=False, meanprops={"marker": "o", "markerfacecolor": "white", "markeredgecolor": "black", "markersize": "6"},
-                 medianprops=dict(color="grey", alpha=0.85, linewidth=1.9, linestyle='-'), showmeans=True)
-ax.axhline(0, color='k', linewidth=2.5)
-
-axes.set_title(r"$\bf{(b)}$"+' Locations 1000-2000m', loc='left', fontsize=16)
-axes.yaxis.grid(True)
-axes.set_ylabel(u'Δ HS [m] ', fontsize=14)
-axes.set_xticklabels([])
-for label in (axes.get_xticklabels() + axes.get_yticklabels()):
-    label.set_fontsize(13)
-
-for patch in ax.patches[1:-1:3]:
-    r, g, b, a = patch.get_facecolor()
-    patch.set_facecolor((r, g, b, 0.6))
-
-for patch in ax.patches[2:-1:3]:
-    r, g, b, a = patch.get_facecolor()
-    patch.set_facecolor((r, g, b, 0.2))
-
-
-################################################################
-plt.text(0.04, 0.55, 'RMSE='+str(rmse_2000.crujra_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.055, 0.55, 'MAE='+str(mae_2000.crujra_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.14, 0.5, 'RMSE='+str(rmse_2000.crujra_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.155, 0.5, 'MAE='+str(mae_2000.crujra_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.24, 0.58, 'RMSE='+str(rmse_2000.crujra_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.26, 0.58, 'MAE='+str(mae_2000.crujra_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.345, 0.3, 'RMSE='+str(rmse_2000.crujraP_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.365, 0.3, 'MAE='+str(mae_2000.crujraP_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.445, 0.31, 'RMSE='+str(rmse_2000.crujraP_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.46, 0.31, 'MAE='+str(mae_2000.crujraP_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.53, 0.37, 'RMSE='+str(rmse_2000.crujraP_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.545, 0.37, 'MAE='+str(mae_2000.crujraP_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.64, 0.25, 'RMSE='+str(rmse_2000.oshd_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.655, 0.25, 'MAE='+str(mae_2000.oshd_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.735, 0.25, 'RMSE='+str(rmse_2000.oshd_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.75, 0.25, 'MAE='+str(mae_2000.oshd_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.84, 0.25, 'RMSE='+str(rmse_2000.oshd_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.855, 0.25, 'MAE='+str(mae_2000.oshd_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.93, 0.25, 'RMSE='+str(rmse_2000.HS_jim.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.945, 0.25, 'MAE='+str(mae_2000.HS_jim.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-################################################################
-
-axes = fig.add_subplot(313)
-ax = sns.boxplot(data=(df_3000[['diff_cru_orig', 'diff_cru_new', 'diff_cru_nofor',
-                                      'diff_cruP_orig', 'diff_cruP_new', 'diff_cruP_nofor',
-                                      'diff_oshd_orig', 'diff_oshd_new', 'diff_oshd_nofor', 'FSM']]), ax=axes, palette=my_pal,
-                 flierprops=flierprops, linewidth=1.6, saturation=0.8, showfliers=False, meanprops={"marker": "o", "markerfacecolor": "white", "markeredgecolor": "black", "markersize": "6"},
-                 medianprops=dict(color="grey", alpha=0.85, linewidth=1.9, linestyle='-'), showmeans=True)
-ax.axhline(0, color='k', linewidth=2.5)
-
-axes.set_title(r"$\bf{(c)}$"+' Locations > 2000m', loc='left', fontsize=16)
-axes.yaxis.grid(True)
-axes.set_ylabel(u'Δ HS [m] ', fontsize=14)
-for label in (axes.get_xticklabels() + axes.get_yticklabels()):
-    label.set_fontsize(13)
-axes.set_xticklabels([r'Clim$_{CRU 1km}$+LU$_{Gl 1km}$', 'Clim$_{CRU 1km}$+LU$_{HR 1km}$', 'Clim$_{CRU 1km}$+LU$_{nofor}$',
-                      r"Clim$_{CRU^{*} 1km}$+LU$_{Gl 1km}$", "Clim$_{CRU^{*} 1km}$+LU$_{HR 1km}$", "Clim$_{CRU^{*} 1km}$+LU$_{nofor}$",
-                      "Clim$_{OSHD 1km}$+LU$_{Gl 1km}$", "Clim$_{OSHD 1km}$+LU$_{HR 1km}$", "Clim$_{OSHD 1km}$+LU$_{nofor}$",
-                      "Ref. (FSM2)"],
-                     rotation=20, ha='right')
-
-for patch in ax.patches[1:-1:3]:
-    r, g, b, a = patch.get_facecolor()
-    patch.set_facecolor((r, g, b, 0.6))
-
-for patch in ax.patches[2:-1:3]:
-    r, g, b, a = patch.get_facecolor()
-    patch.set_facecolor((r, g, b, 0.2))
-
-################################################################
-plt.text(0.04, 0.55, 'RMSE='+str(rmse_3000.crujra_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.055, 0.55, 'MAE='+str(mae_3000.crujra_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.14, 0.5, 'RMSE='+str(rmse_3000.crujra_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.155, 0.5, 'MAE='+str(mae_3000.crujra_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.24, 0.58, 'RMSE='+str(rmse_3000.crujra_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.26, 0.58, 'MAE='+str(mae_3000.crujra_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.345, 0.3, 'RMSE='+str(rmse_3000.crujraP_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.365, 0.3, 'MAE='+str(mae_3000.crujraP_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.445, 0.31, 'RMSE='+str(rmse_3000.crujraP_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.46, 0.31, 'MAE='+str(mae_3000.crujraP_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.53, 0.37, 'RMSE='+str(rmse_3000.crujraP_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.545, 0.37, 'MAE='+str(mae_3000.crujraP_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.64, 0.25, 'RMSE='+str(rmse_3000.oshd_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.655, 0.25, 'MAE='+str(mae_3000.oshd_origSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.735, 0.25, 'RMSE='+str(rmse_3000.oshd_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.75, 0.25, 'MAE='+str(mae_3000.oshd_newSurf.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.84, 0.25, 'RMSE='+str(rmse_3000.oshd_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.855, 0.25, 'MAE='+str(mae_3000.oshd_nofor.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-
-plt.text(0.93, 0.25, 'RMSE='+str(rmse_3000.HS_jim.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-plt.text(0.945, 0.25, 'MAE='+str(mae_3000.HS_jim.values[0])+'m', rotation=90, ha='left', va='center',
-         transform=axes.transAxes, fontsize=8.5)
-################################################################
-
-plt.tight_layout()
-fig.savefig(bf / 'ptclm5_comp_boxplot_revision.png', facecolor='white', transparent=False, bbox_inches='tight')
-fig.savefig(bf / 'ptclm5_comp_boxplot_revision.pdf', transparent=True)
