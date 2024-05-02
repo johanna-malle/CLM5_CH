@@ -416,16 +416,16 @@ for subplot_data in SUBPLOTS_DATA:
     if subplot_data["axis_idx"][1] == 0:
         amax = 0.5
         tick_rms = [0.2, 0.4]
-        title_ax = 'FSM 1st Dec.'
+        title_ax = 'FSM2 1st Dec.'
         title_ax_x = 0.018
         title_ax_y = -0.01
         tickSTD = [0.2, 0.4]
         rincSTD = [0.2, 0.4]
 
     elif subplot_data["axis_idx"][1] == 1:
-        title_ax = 'FSM 1st Feb.'
+        title_ax = 'FSM2 1st Feb.'
     else:
-        title_ax = 'FSM 1st Apr.'
+        title_ax = 'FSM2 1st Apr.'
 
     # create the plot with the observed data
     stdev, crmsd, ccoef = subplot_data["observed"]
