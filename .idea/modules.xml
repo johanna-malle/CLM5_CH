@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/CLM5_CH.iml" filepath="$PROJECT_DIR$/.idea/CLM5_CH.iml" />
+      <module fileurl="file://$USER_HOME$/slfhome/PostDoc/clm5_analysis_python/.idea/clm5_analysis_python.iml" filepath="$USER_HOME$/slfhome/PostDoc/clm5_analysis_python/.idea/clm5_analysis_python.iml" />
+      <module fileurl="file://$USER_HOME$/slfhome/PostDoc/python_clm5_CH_analysis/.idea/python_clm5_CH_analysis.iml" filepath="$USER_HOME$/slfhome/PostDoc/python_clm5_CH_analysis/.idea/python_clm5_CH_analysis.iml" />
     </modules>
   </component>
 </project>
