@@ -204,7 +204,7 @@ ax1.add_geometries([switzerland], ccrs.Geodetic(), edgecolor='darkred', linewidt
 plt.axis('off')
 
 ax0 = plt.subplot(333, projection=proj_map)
-veg_global_1km.PCT_NATVEG.plot(transform=proj_data, cmap='viridis', add_colorbar=False,
+veg_global_1km['__xarray_dataarray_variable__'].plot(transform=proj_data, cmap='viridis', add_colorbar=False,
                                vmin=min_all, vmax=max_all, subplot_kws={'projection': proj_map})
 ax0.add_geometries([switzerland], ccrs.Geodetic(), edgecolor='darkred', linewidth=1.35, facecolor='none')
 plt.axis('off')
@@ -222,7 +222,7 @@ plt.axis('off')
 # plt.axis('off')
 
 ax0a = plt.subplot(336, projection=proj_map)
-p = veg_highres_1km.PCT_NATVEG.plot(transform=proj_data, cmap='viridis', add_colorbar=False,
+p = veg_highres_1km['__xarray_dataarray_variable__'].plot(transform=proj_data, cmap='viridis', add_colorbar=False,
                                     vmin=min_all, vmax=max_all, subplot_kws={'projection': proj_map})
 ax0a.add_geometries([switzerland], ccrs.Geodetic(), edgecolor='darkred', linewidth=1.35, facecolor='none')
 plt.axis('off')
