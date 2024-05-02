@@ -181,8 +181,8 @@ plt.subplots_adjust(wspace=0, hspace=0)
 
 fig1.savefig(base_dir / 'comp_temp_cru_all.png', transparent=True, bbox_inches='tight')
 fig1.savefig(base_dir / 'comp_temp_cru_all_noT.png', transparent=False, bbox_inches='tight')
-fig1.savefig(base_dir / 'comp_temp_cru_all.eps', dpi=800)
-fig1.savefig(base_dir / 'comp_temp_cru_all.pdf')
+#fig1.savefig(base_dir / 'comp_temp_cru_all.eps', dpi=800)
+#fig1.savefig(base_dir / 'comp_temp_cru_all.pdf')
 
 # now surface dataset
 min_all = 0
@@ -234,8 +234,8 @@ plt.subplots_adjust(wspace=0, hspace=0)
 plt.show()
 fig1.savefig(base_dir / 'comp_vcover_cru_all.pdf')
 fig1.savefig(base_dir / 'comp_vcover_cru_all.png', transparent=True, bbox_inches='tight')
-fig1.savefig(base_dir / 'comp_vcover_cru_all_not.png', transparent=False, bbox_inches='tight')
-fig1.savefig(base_dir / 'comp_vcover_cru_all.eps', dpi=800)
+#fig1.savefig(base_dir / 'comp_vcover_cru_all_not.png', transparent=False, bbox_inches='tight')
+#fig1.savefig(base_dir / 'comp_vcover_cru_all.eps', dpi=800)
 
 
 # now overview figure:
@@ -266,8 +266,8 @@ ax.set_yticklabels([])
 ax.tick_params(direction='in', length=0, width=0)
 ax.add_geometries([switzerland], ccrs.Geodetic(), edgecolor='darkslategray', linewidth=1.35, facecolor='none')
 ax.set_extent([np.min(lon_geo), np.max(lon_geo), np.min(lat_geo), np.max(lat_geo)])
-plt.scatter(fluxnet_pts.x, fluxnet_pts.y, marker='.', s=30, color='forestgreen', transform=proj_data,
-            edgecolor='black', linewidth=0.25)
+#plt.scatter(fluxnet_pts.x, fluxnet_pts.y, marker='.', s=30, color='forestgreen', transform=proj_data,
+#            edgecolor='black', linewidth=0.25)
 
 ax = plt.subplot(332, projection=proj_map)
 major_ticks_x = np.linspace(np.min(x2), np.max(x2), 20)
@@ -297,19 +297,19 @@ ax.tick_params(direction='in', length=0, width=0)
 ax.add_geometries([switzerland], ccrs.Geodetic(), edgecolor='darkslategray', linewidth=1.35, facecolor='none')
 ax.set_extent([np.min(lon_geo), np.max(lon_geo), np.min(lat_geo), np.max(lat_geo)])
 
-plt.scatter(stations_1000.x, stations_1000.y, marker='.', s=28, color='skyblue', transform=proj_data,
-            edgecolor='black', linewidth=0.25)
-plt.scatter(stations_2000.x, stations_2000.y, marker='.', s=28, color='skyblue', transform=proj_data,
-            edgecolor='black', linewidth=0.25)
-plt.scatter(stations_3000.x, stations_3000.y, marker='.', s=28, color='skyblue', transform=proj_data,
-            edgecolor='black', linewidth=0.25)
-plt.scatter(fluxnet_pts.x, fluxnet_pts.y, marker='.', s=30, color='forestgreen', transform=proj_data,
-            edgecolor='black', linewidth=0.25)
+plt.scatter(stations_1000.x, stations_1000.y, marker='.', s=33, color='skyblue', transform=proj_data,
+            edgecolor='black', linewidth=0.3)
+plt.scatter(stations_2000.x, stations_2000.y, marker='.', s=33, color='skyblue', transform=proj_data,
+            edgecolor='black', linewidth=0.3)
+plt.scatter(stations_3000.x, stations_3000.y, marker='.', s=33, color='skyblue', transform=proj_data,
+            edgecolor='black', linewidth=0.3)
+#plt.scatter(fluxnet_pts.x, fluxnet_pts.y, marker='.', s=30, color='forestgreen', transform=proj_data,
+#            edgecolor='black', linewidth=0.25)
 
 plt.subplots_adjust(wspace=0, hspace=0)
 
 plt.show()
-fig.savefig(base_dir / 'grid_comp2.pdf')
+#fig.savefig(base_dir / 'grid_comp2.pdf')
 fig.savefig(base_dir / 'grid_comp2.png', transparent=True, bbox_inches='tight')
 fig.savefig(base_dir / 'grid_comp2_not.png', transparent=False, bbox_inches='tight')
-fig1.savefig(base_dir / 'grid_comp2.eps', dpi=800)
+#fig1.savefig(base_dir / 'grid_comp2.eps', dpi=800)
