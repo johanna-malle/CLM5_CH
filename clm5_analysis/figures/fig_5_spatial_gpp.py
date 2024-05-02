@@ -42,48 +42,57 @@ ds_target_05 = xr.Dataset({"lat": (["lat"], lat_new), "lon": (["lon"], lon_new)}
 
 # load clm5 simulations for the various model configurations -> focus on july/august average 2017
 gpp_load = xr.open_dataset(bf / 'OSHD_FILES' / 'FPSN_SP_MONTH_SUM.nc')
-gpp_201707 = gpp_load.DATA.sel(time=cftime._cftime.DatetimeNoLeap(2017, 7, 1), method='nearest') * conv_umol
-gpp_201708 = gpp_load.DATA.sel(time=cftime._cftime.DatetimeNoLeap(2017, 8, 1), method='nearest') * conv_umol
-gpp_oshd_avg = (gpp_201707 + gpp_201708) / 2
+# gpp_201707 = gpp_load.DATA.sel(time=cftime._cftime.DatetimeNoLeap(2017, 7, 1), method='nearest') * conv_umol
+# gpp_201708 = gpp_load.DATA.sel(time=cftime._cftime.DatetimeNoLeap(2017, 8, 1), method='nearest') * conv_umol
+gpp_yrly = gpp_load.where(gpp_load['time.year'] > 2015, drop=True).resample(time='Y').sum() * conv_umol
+gpp_yrly_avg = gpp_yrly.mean(dim='time').DATA
+gpp_oshd_avg = gpp_yrly_avg
+id_dom = ~np.isnan(gpp_load.isel(time=20).DATA).data *1
+gpp_oshd_avg = gpp_oshd_avg.where(id_dom)
+# gpp_oshd_avg.coords['mask_lake'] = (('lat', 'lon'), (id_surf*1).squeeze().data)
 
 gpp_load = xr.open_dataset(bf / 'OSHD_FILES_OLD' / 'FPSN_SP_MONTH_SUM.nc')
-gpp_201707 = gpp_load.DATA.sel(time=cftime._cftime.DatetimeNoLeap(2017, 7, 1), method='nearest') * conv_umol
-gpp_201708 = gpp_load.DATA.sel(time=cftime._cftime.DatetimeNoLeap(2017, 8, 1), method='nearest') * conv_umol
-gpp_oshd_global_avg = (gpp_201707 + gpp_201708) / 2
+gpp_yrly = gpp_load.where(gpp_load['time.year'] > 2015, drop=True).resample(time='Y').sum() * conv_umol
+gpp_yrly_avg = gpp_yrly.mean(dim='time').DATA
+gpp_oshd_global_avg = gpp_yrly_avg
+gpp_oshd_global_avg = gpp_oshd_global_avg.where(id_dom)
+
 
 gpp_load = xr.open_dataset(bf / 'CRUJRA_FILES_OLD' / 'FPSN_SP_MONTH_SUM.nc')
-gpp_201707 = gpp_load.DATA.sel(time=cftime._cftime.DatetimeNoLeap(2017, 7, 1), method='nearest') * conv_umol
-gpp_201708 = gpp_load.DATA.sel(time=cftime._cftime.DatetimeNoLeap(2017, 8, 1), method='nearest') * conv_umol
-gpp_crujra_avg = (gpp_201707 + gpp_201708) / 2
+gpp_yrly = gpp_load.where(gpp_load['time.year'] > 2015, drop=True).resample(time='Y').sum() * conv_umol
+gpp_yrly_avg = gpp_yrly.mean(dim='time').DATA
+gpp_crujra_avg = gpp_yrly_avg
+gpp_crujra_avg = gpp_crujra_avg.where(id_dom)
 
 gpp_load = xr.open_dataset(bf / 'CRUJRA_FILES_noLapse_OLD' / 'FPSN_SP_MONTH_SUM.nc')
-gpp_201707 = gpp_load.DATA.sel(time=cftime._cftime.DatetimeNoLeap(2017, 7, 1), method='nearest') * conv_umol
-gpp_201708 = gpp_load.DATA.sel(time=cftime._cftime.DatetimeNoLeap(2017, 8, 1), method='nearest') * conv_umol
-gpp_crujra_nolapse_avg = (gpp_201707 + gpp_201708) / 2
+gpp_yrly = gpp_load.where(gpp_load['time.year'] > 2015, drop=True).resample(time='Y').sum() * conv_umol
+gpp_yrly_avg = gpp_yrly.mean(dim='time').DATA
+gpp_crujra_nolapse_avg = gpp_yrly_avg
+gpp_crujra_nolapse_avg = gpp_crujra_nolapse_avg.where(id_dom)
 
 gpp_load = xr.open_dataset(bf / 'CRUJRA_FILES_025deg_cru_new' / 'FPSN.nc')  # not monthly sums yet!
 sum_month = gpp_load.resample(time='1M').sum()
 bacK_regridder_nearest_025 = xe.Regridder(ds_target_025, gpp_crujra_nolapse_avg, "nearest_s2d")
 sum_month_re = bacK_regridder_nearest_025(sum_month)
-gpp_201707 = sum_month_re.DATA.sel(time=cftime._cftime.DatetimeNoLeap(2017, 7, 1), method='nearest') * conv_umol
-gpp_201708 = sum_month_re.DATA.sel(time=cftime._cftime.DatetimeNoLeap(2017, 8, 1), method='nearest') * conv_umol
-gpp_crujra_025_avg = (gpp_201707 + gpp_201708) / 2
+gpp_yrly = sum_month_re.where(sum_month_re['time.year'] > 2015, drop=True).resample(time='Y').sum() * conv_umol
+gpp_yrly_avg = gpp_yrly.mean(dim='time').DATA
+gpp_crujra_025_avg = gpp_yrly_avg
 
 gpp_load = xr.open_dataset(bf / 'CRUJRA_FILES_05deg_cru_new' / 'FPSN.nc')
 sum_month = gpp_load.resample(time='1M').sum()
 bacK_regridder_nearest_05 = xe.Regridder(ds_target_05, gpp_crujra_nolapse_avg, "nearest_s2d")
 sum_month_re = bacK_regridder_nearest_05(sum_month)
-gpp_201707 = sum_month_re.DATA.sel(time=cftime._cftime.DatetimeNoLeap(2017, 7, 1), method='nearest') * conv_umol
-gpp_201708 = sum_month_re.DATA.sel(time=cftime._cftime.DatetimeNoLeap(2017, 8, 1), method='nearest') * conv_umol
-gpp_crujra_05_avg = (gpp_201707 + gpp_201708) / 2
+gpp_yrly = sum_month_re.where(sum_month_re['time.year'] > 2015, drop=True).resample(time='Y').sum() * conv_umol
+gpp_yrly_avg = gpp_yrly.mean(dim='time').DATA
+gpp_crujra_05_avg = gpp_yrly_avg
 
 # now coarse OSHD
 gpp_load = xr.open_dataset(bf / 'OSHD_FILES_05_new' / 'FPSN.nc')
 sum_month = gpp_load.resample(time='1M').sum()
 sum_month_re = bacK_regridder_nearest_05(sum_month)
-gpp_201707 = sum_month_re.DATA.sel(time=cftime._cftime.DatetimeNoLeap(2017, 7, 1), method='nearest') * conv_umol
-gpp_201708 = sum_month_re.DATA.sel(time=cftime._cftime.DatetimeNoLeap(2017, 8, 1), method='nearest') * conv_umol
-gpp_oshd_05_avg = (gpp_201707 + gpp_201708) / 2
+gpp_yrly = sum_month_re.where(sum_month_re['time.year'] > 2015, drop=True).resample(time='Y').sum() * conv_umol
+gpp_yrly_avg = gpp_yrly.mean(dim='time').DATA
+gpp_oshd_05_avg = gpp_yrly_avg
 
 surf_in = xr.open_dataset(bf / 'surfdata_1km_CH_v3_hist_16pfts_Irrig_CMIP6_NEW.nc')
 id_surf = surf_in.PCT_LAKE < 101
@@ -184,12 +193,13 @@ cbar_delta = inset_axes(axs[2, 0], width="70%",  # width: 5% of parent_bbox widt
                         height="45%",  # height: 50%
                         loc="lower center", bbox_to_anchor=(0.5, -1.45, 1, 0.15), bbox_transform=axs[2, 0].transAxes,
                         borderpad=0.2)
-fig.colorbar(p, cax=cbar_abs, orientation="horizontal", label='GPP$_{JA}$ [gC m$^{-2}$ month$^{-1}$]')
-fig.colorbar(p1, cax=cbar_delta, orientation="horizontal", label='$\Delta$ GPP$_{JA}$ [gC m$^{-2}$ month$^{-1}$]')
+fig.colorbar(p, cax=cbar_abs, orientation="horizontal", label='GPP$_{2016-19}$ [gC m$^{-2}$ yr$^{-1}$]')
+fig.colorbar(p1, cax=cbar_delta, orientation="horizontal", label='$\Delta$ GPP$_{2016-19}$ [gC m$^{-2}$ yr$^{-1}$]')
 plt.subplots_adjust(right=0.99, top=0.99, wspace=-0.02, hspace=-0.33)
 plt.tight_layout()
 plt.show()
-fig.savefig(Path(r'/home/lud11/malle/CLM5_CH/new_figures/gpp_spatial_comp_v2.pdf'),
+
+fig.savefig(Path(r'/home/lud11/malle/CLM5_CH/new_figures/gpp_spatial_comp_rev1.png'),
             facecolor='white', transparent=False)
-fig.savefig(Path(r'/home/lud11/malle/CLM5_CH/new_figures/gpp_spatial_comp_v2.png'),
+fig.savefig(Path(r'/home/lud11/malle/CLM5_CH/new_figures/gpp_spatial_comp_rev1.pdf'),
             facecolor='white', transparent=False)
