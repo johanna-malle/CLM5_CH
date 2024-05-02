@@ -40,11 +40,8 @@ lat_geo = input_global.LATIXY[:, 0]
 lon_geo = input_global.LONGXY[0, :]
 input_global = input_global.assign_coords({'lsmlon': lon_geo.data, 'lsmlat': lat_geo.data})
 input_highres = input_highres.assign_coords({'lsmlon': lon_geo.data, 'lsmlat': lat_geo.data})
-# veg_global_1km = input_global.PCT_NATVEG.where(domain.mask.data, np.nan)
-# veg_highres_1km = input_highres.PCT_NATVEG.where(domain.mask.data, np.nan)
 
 bf_files = base_dir / 'out_for_plots'
-# output data, so I can work with it on my windows machine
 file_oshd_05deg = bf_files / 'temp_oshd_05deg.nc'
 file_cru_05deg = bf_files / 'temp_cru_05deg.nc'
 file_cruplus_05deg = bf_files / 'temp_cruplus_05deg.nc'
@@ -56,12 +53,10 @@ file_cru_1km = bf_files / 'temp_cru_1km.nc'
 file_cruplus_1km = bf_files / 'temp_cruplus_1km.nc'
 
 temp_oshd_05deg = xr.open_dataset(file_oshd_05deg)
-# temp_oshd_05deg['lon']=temp_oshd_05deg['lon']#-180
 temp_cru_05deg = xr.open_dataset(file_cru_05deg)
 temp_cruplus_05deg = xr.open_dataset(file_cruplus_05deg)
 
 temp_oshd_025deg = xr.open_dataset(file_oshd_025deg)
-# temp_oshd_025deg['lon'] = temp_oshd_025deg['lon']# -180
 temp_cru_025deg = xr.open_dataset(file_cru_025deg)
 temp_cruplus_025deg = xr.open_dataset(file_cruplus_025deg)
 
@@ -74,22 +69,17 @@ file_vegHR_025deg = bf_files / 'veg_hr_025.nc'
 file_vegHR_05deg = bf_files / 'veg_hr_05.nc'
 file_vegG_025deg = bf_files / 'veg_gl_025.nc'
 file_vegG_05deg = bf_files / 'veg_gl_05.nc'
-
 file_vegHR_1km = bf_files / 'veg_hr_1km.nc'
 file_vegG_1km = bf_files / 'veg_gl_1km.nc'
 
 veg_global_025deg = xr.open_dataset(file_vegG_025deg)
 veg_global_05deg = xr.open_dataset(file_vegG_05deg)
-
 veg_global_1km = xr.open_dataset(file_vegG_1km)
 veg_highres_1km = xr.open_dataset(file_vegHR_1km)
 
 # start with comp of CRUJRA data
 # Find the swiss boundary polygon.
-countries = shapereader.natural_earth(resolution='10m',
-                                      category='cultural',
-                                      name='admin_0_countries')
-
+countries = shapereader.natural_earth(resolution='10m', category='cultural', name='admin_0_countries')
 for country in shapereader.Reader(countries).records():
     if 'Switzerland' in country.attributes['NAME_EN']:
         switzerland = country.geometry
@@ -99,7 +89,6 @@ else:
 
 proj_data = ccrs.PlateCarree()
 proj_map = ccrs.UTM(zone=32, southern_hemisphere=False)
-
 min_all = np.nanmin([temp_oshd_025deg.TBOT-273.15, temp_oshd_05deg.TBOT-273.15, temp_oshd_1km.TBOT-273.15,
                      temp_cruplus_025deg.TBOT-273.15, temp_cruplus_05deg.TBOT-273.15, temp_cruplus_1km.TBOT-273.15,
                      temp_cru_025deg.TBOT-273.15, temp_cru_05deg.TBOT-273.15, temp_cru_1km.TBOT-273.15])
@@ -181,12 +170,9 @@ plt.subplots_adjust(wspace=0, hspace=0)
 
 fig1.savefig(base_dir / 'comp_temp_cru_all.png', transparent=True, bbox_inches='tight')
 fig1.savefig(base_dir / 'comp_temp_cru_all_noT.png', transparent=False, bbox_inches='tight')
-#fig1.savefig(base_dir / 'comp_temp_cru_all.eps', dpi=800)
-#fig1.savefig(base_dir / 'comp_temp_cru_all.pdf')
 
 # now surface dataset
-min_all = 0
-max_all = 100
+min_all, max_all = 0, 100
 
 fig1 = plt.figure(figsize=[9, 6.5])
 ax0a = plt.subplot(331, projection=proj_map)
@@ -205,25 +191,14 @@ plt.axis('off')
 
 ax0 = plt.subplot(333, projection=proj_map)
 veg_global_1km['__xarray_dataarray_variable__'].plot(transform=proj_data, cmap='viridis', add_colorbar=False,
-                               vmin=min_all, vmax=max_all, subplot_kws={'projection': proj_map})
+                                                     vmin=min_all, vmax=max_all, subplot_kws={'projection': proj_map})
 ax0.add_geometries([switzerland], ccrs.Geodetic(), edgecolor='darkred', linewidth=1.35, facecolor='none')
 plt.axis('off')
 
-# ax0a = plt.subplot(334, projection=proj_map)
-# p = veg_highres_05deg.plot(transform=proj_data, cmap='viridis', add_colorbar=False,
-#                 vmin=min_all, vmax=max_all, subplot_kws={'projection': proj_map})
-# ax0a.add_feature(cf.BORDERS, linewidth=1.2, edgecolor='dimgray', alpha=1)
-# plt.axis('off')
-
-# ax0a = plt.subplot(335, projection=proj_map)
-# p = veg_highres_025deg.plot(transform=proj_data, cmap='viridis', add_colorbar=False,
-#                 vmin=min_all, vmax=max_all, subplot_kws={'projection': proj_map})
-# ax0a.add_feature(cf.BORDERS, linewidth=1.2, edgecolor='dimgray', alpha=1)
-# plt.axis('off')
-
 ax0a = plt.subplot(336, projection=proj_map)
 p = veg_highres_1km['__xarray_dataarray_variable__'].plot(transform=proj_data, cmap='viridis', add_colorbar=False,
-                                    vmin=min_all, vmax=max_all, subplot_kws={'projection': proj_map})
+                                                          vmin=min_all, vmax=max_all,
+                                                          subplot_kws={'projection': proj_map})
 ax0a.add_geometries([switzerland], ccrs.Geodetic(), edgecolor='darkred', linewidth=1.35, facecolor='none')
 plt.axis('off')
 cax = fig1.add_axes([ax0.get_position().x1+0.01, ax0.get_position().y0-0.22, 0.02, ax0.get_position().height*1.5])
@@ -231,12 +206,8 @@ cb = plt.colorbar(p, cax=cax)
 cb.ax.tick_params(labelsize=8)
 cb.set_label('Vegetation Cover (%)', rotation=90, fontsize=9)
 plt.subplots_adjust(wspace=0, hspace=0)
-plt.show()
 fig1.savefig(base_dir / 'comp_vcover_cru_all.pdf')
 fig1.savefig(base_dir / 'comp_vcover_cru_all.png', transparent=True, bbox_inches='tight')
-#fig1.savefig(base_dir / 'comp_vcover_cru_all_not.png', transparent=False, bbox_inches='tight')
-#fig1.savefig(base_dir / 'comp_vcover_cru_all.eps', dpi=800)
-
 
 # now overview figure:
 input_crujra_plus = xr.open_dataset(base_dir / 'clmforc.crujra.TQ.2018-05_lapse.nc')
@@ -266,7 +237,7 @@ ax.set_yticklabels([])
 ax.tick_params(direction='in', length=0, width=0)
 ax.add_geometries([switzerland], ccrs.Geodetic(), edgecolor='darkslategray', linewidth=1.35, facecolor='none')
 ax.set_extent([np.min(lon_geo), np.max(lon_geo), np.min(lat_geo), np.max(lat_geo)])
-#plt.scatter(fluxnet_pts.x, fluxnet_pts.y, marker='.', s=30, color='forestgreen', transform=proj_data,
+# plt.scatter(fluxnet_pts.x, fluxnet_pts.y, marker='.', s=30, color='forestgreen', transform=proj_data,
 #            edgecolor='black', linewidth=0.25)
 
 ax = plt.subplot(332, projection=proj_map)
@@ -303,13 +274,10 @@ plt.scatter(stations_2000.x, stations_2000.y, marker='.', s=33, color='skyblue',
             edgecolor='black', linewidth=0.3)
 plt.scatter(stations_3000.x, stations_3000.y, marker='.', s=33, color='skyblue', transform=proj_data,
             edgecolor='black', linewidth=0.3)
-#plt.scatter(fluxnet_pts.x, fluxnet_pts.y, marker='.', s=30, color='forestgreen', transform=proj_data,
+# plt.scatter(fluxnet_pts.x, fluxnet_pts.y, marker='.', s=30, color='forestgreen', transform=proj_data,
 #            edgecolor='black', linewidth=0.25)
 
 plt.subplots_adjust(wspace=0, hspace=0)
-
 plt.show()
-#fig.savefig(base_dir / 'grid_comp2.pdf')
 fig.savefig(base_dir / 'grid_comp2.png', transparent=True, bbox_inches='tight')
 fig.savefig(base_dir / 'grid_comp2_not.png', transparent=False, bbox_inches='tight')
-#fig1.savefig(base_dir / 'grid_comp2.eps', dpi=800)

@@ -29,16 +29,14 @@ def rmse(y_true, predictions):
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
 
-
 if platform.system() == 'Windows':
     bf = Path('L:\malle\CLM5_CH')
 else:
     bf = Path('/home/lud11/malle/CLM5_CH')
 
-
 path_FSM = bf / 'FSM_new' / 'analysed_points'
 all_files = glob.glob(os.path.join(path_FSM, "*.csv"))  # just do this once to get all ids
-# if windows:
+
 if platform.system() == 'Windows':
     all_locs_comp = list((f.split('\\')[-1]).split('_')[1] for f in all_files)
 else:
@@ -56,7 +54,6 @@ path_crujraP_origSurf = bf / 'PTCLM_all_CRUJRA_lapse_origSurf'
 path_crujraP_nofor = bf / 'PTCLM5_nofor' / 'PTCLM5_nofor_CRU_lapse'
 path_crujra_nofor = bf / 'PTCLM5_nofor' / 'PTCLM5_nofor_CRU_Nolapse'
 path_oshd_nofor = bf / 'PTCLM5_nofor' / 'PTCLM5_nofor_OSHD'
-
 
 bf_meas = bf / 'dvd_oshd'
 all_data_1000 = pd.DataFrame([])
@@ -80,9 +77,8 @@ bw_1000_2000 = [x[0] for x in elev_comp if (x[1] > 1000 and x[1] < 2000)]
 above_2000 = [x[0] for x in elev_comp if x[1] >= 2000]
 
 for locs in all_locs:
-
     meas_in = pd.read_csv(glob.glob(os.path.join(bf_meas, "*" + locs + "*.csv"))[0]).set_index('time_HS_meas')
-    meas_in = meas_in.loc[~meas_in.index.duplicated(keep='first')] # this is necessary since some seasons overlapped..
+    meas_in = meas_in.loc[~meas_in.index.duplicated(keep='first')]  # this is necessary since some seasons overlapped..
     meas_in.set_index(pd.to_datetime(meas_in.index), inplace=True)
     meas_in.dropna(inplace=True)
 
@@ -135,15 +131,12 @@ for locs in all_locs:
     FSM.set_index('time_stamp_comp', inplace=True)
     FSM.drop(['time_stamps_jim', 'scf_jim', 'SWE_jim'], axis=1, inplace=True)
     time_filter = pd.to_datetime(FSM.index)
-    FSM1 = FSM[((time_filter.month < 8) | (time_filter.month > 9)) & (time_filter.year < 2021)]  # only comp. oct-june
-    # FSM1 = FSM[(time_filter.year < 2021)]  # only comp. oct-june
+    FSM1 = FSM[((time_filter.month < 8) | (time_filter.month > 9)) & (time_filter.year < 2021)]  # only comp. oct-july
     FSM1.set_index(pd.to_datetime(FSM1.index), inplace=True)
 
     result_all = pd.concat([result, FSM1], axis=1, join='inner')
     result_all.to_csv(name_out)
-
     result_all_meas = pd.concat([result_all, meas_in], axis=1, join='inner')
-    # all_data = all_data.append(result_all_meas)
 
     if locs in less_1000:
         all_data_1000 = pd.concat([all_data_1000, result_all_meas])
@@ -469,5 +462,4 @@ plt.text(0.915, 0.02, 'MAE='+str(mae_3000.HS_jim.values[0])+'m', rotation=0, ha=
          transform=axes.transAxes, fontsize=8.3)
 plt.tight_layout()
 fig.savefig(bf / 'fig_2_revision.png', facecolor='white', transparent=False, bbox_inches='tight')
-# fig.savefig(bf / 'ptclm5_comp_boxplot_revision.pdf', transparent=True)
 
