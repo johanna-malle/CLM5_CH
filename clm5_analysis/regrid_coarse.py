@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Desc: 
+Desc: for revisions we want to analyse everything at 0.25 and/or 0.5 degrees -> upscale 1km simulations
+-> use xesmf_env_new2 !!!
 Created on 29.01.24 08:54
 @author: malle
 """
@@ -17,24 +18,11 @@ import pandas as pd
 import platform
 
 
-# make switch to windows if working from home
 if platform.system() == 'Linux':
     bf = Path('/home/lud11/malle/CLM5_CH')
 else:
     bf = Path('L:\malle\CLM5_CH')
 
-# test = xr.open_dataset('/home/lud11/malle/CLM5_CH/FSM_new/output_grid_250_python/TabsD_OSHD_2016_reprojected_swisscors.nc')
-# x_in = test.chx.data
-# y_in = test.chy.data
-#
-# lat_in_proj = pd.read_csv('/home/lud11/malle/CLM5_CH/FSM_new/lat_proj_1km.csv')
-# lon_in_proj = pd.read_csv('/home/lud11/malle/CLM5_CH/FSM_new/lon_proj_1km.csv')
-#
-# # convert from swiss grid to lat long
-# xd = (x_in - 600000) / 1000000
-# yd = (y_in - 200000) / 1000000
-# lon = (2.6779094 + 4.728982 * xd + 0.791484 * xd * yd + 0.1306 * xd * yd ^ 2 - 0.0436 * xd ^ 3) * 100. / 36
-# lat = (16.9023892 + 3.238272 * yd - 0.270978 * xd ^ 2 - 0.002528 * yd ^ 2 - 0.0447. * xd. ^ 2. * yd - 0.0140. * yd. ^ 3). * 100. / 36
 
 bf_jim = bf / 'FSM_new' / 'analysed_grid_python'
 bf_jim_out = Path('/home/lud11/malle/CLM5_CH/FSM_new/analysed_grid_python_out')

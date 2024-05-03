@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Desc: 
+Desc: Taylor diagrams (Fig. 4 of paper) based on SkillMetrics (https://github.com/PeterRochford/SkillMetrics)
 Created on 30.01.24 10:27
 @author: malle
 """
@@ -15,49 +15,43 @@ import matplotlib.pyplot as plt
 import skill_metrics as sm
 import numpy as np
 import platform
-import distinctipy
 import cartopy.crs as ccrs
 import cartopy.feature as cf
 
-proj_data = ccrs.PlateCarree()
-proj_map = ccrs.UTM(zone=32, southern_hemisphere=False)
-
-
-# make switch to windows if working from home
 if platform.system() == 'Linux':
     bf = Path('/home/lud11/malle/CLM5_CH')
 else:
     bf = Path('L:\malle\CLM5_CH')
 
+bf_out = bf / 'figures_revisions'
 bf_oshd = bf / 'FSM_new/analysed_grid_python_out'
 all_FSM = xr.open_mfdataset(glob.glob(str(bf_oshd / '*025*')))
-
-bf_out = bf / 'figures_revisions'
+snow_in_025 = '*_025_SNOW_DEPTH*'
 
 FSM_feb = all_FSM.isel(time=(all_FSM.time.dt.month == 2) & (all_FSM.time.dt.day == 1))
 FSM_apr = all_FSM.isel(time=(all_FSM.time.dt.month == 4) & (all_FSM.time.dt.day == 1))
 FSM_dez = all_FSM.isel(time=(all_FSM.time.dt.month == 12) & (all_FSM.time.dt.day == 1))
-
 max_dec = np.max(FSM_dez.DATA).values
 max_feb = np.max(FSM_feb.DATA).values
 max_apr = np.max(FSM_apr.DATA).values
 
-# make quick plots
+# make quick overview plots
+proj_data = ccrs.PlateCarree()
+proj_map = ccrs.UTM(zone=32, southern_hemisphere=False)
 fig, axs = plt.subplots(3, 4, figsize=[15, 7], frameon=False, subplot_kw={'projection': proj_map})
 for tix in range(0, np.shape(axs)[1]):
     FSM_dez.isel(time=tix).DATA.plot(transform=proj_data, cmap='YlGnBu', add_colorbar=True, ax=axs[0, tix],
-                                    cbar_kwargs={'label': "Snow Depth [m]"}, vmin=0, vmax=max_dec)
+                                     cbar_kwargs={'label': "Snow Depth [m]"}, vmin=0, vmax=max_dec)
     FSM_feb.isel(time=tix).DATA.plot(transform=proj_data, cmap='YlGnBu', add_colorbar=True, ax=axs[1, tix],
-                                    cbar_kwargs={'label': "Snow Depth [m]"}, vmin=0, vmax=max_feb)
+                                     cbar_kwargs={'label': "Snow Depth [m]"}, vmin=0, vmax=max_feb)
     FSM_apr.isel(time=tix).DATA.plot(transform=proj_data, cmap='YlGnBu', add_colorbar=True, ax=axs[2, tix],
-                                    cbar_kwargs={'label': "Snow Depth [m]"}, vmin=0, vmax=max_apr)
+                                     cbar_kwargs={'label': "Snow Depth [m]"}, vmin=0, vmax=max_apr)
 for ii in range(0, np.shape(axs)[0]):
     for jj in range(0, np.shape(axs)[1]):
         axs[ii, jj].axis('off')
         axs[ii, jj].add_feature(cf.BORDERS, linewidth=1, edgecolor='dimgray', alpha=1)
 plt.tight_layout()
-plt.show()
-fig.savefig(bf_out / 'comp_taylor' / Path('FSM' + '.png'), transparent=False, bbox_inches='tight')
+fig.savefig(bf_out / 'comp_taylor' / 'FSM.png', transparent=False, bbox_inches='tight')
 
 FSM_feb_flat = FSM_feb.DATA.values.flatten()
 FSM_feb_flat = FSM_feb_flat[~np.isnan(FSM_feb_flat)]
@@ -68,36 +62,22 @@ FSM_dec_flat = FSM_dec_flat[~np.isnan(FSM_dec_flat)]
 
 run_in_all_1km = ['CRUJRA_FILES_noLapse_OLD', 'CRUJRA_FILES_noLapse',
                   'CRUJRA_FILES_OLD', 'CRUJRA_FILES', 'OSHD_FILES_OLD', 'OSHD_FILES']
-
 run_in_coarse = ['CRUJRA_FILES_05deg_cru_new', 'CRUJRA_FILES_05deg_cru_new_lapse', 'OSHD_FILES_05_new',
                  'CRUJRA_FILES_025deg_cru_new', 'CRUJRA_FILES_025deg_cru_new_lapse', 'OSHD_FILES_025_new']
-
-label_in = ['FSM', 'Clim$_{CRU0.5^{\circ}}$+LU$_{Gl0.5^{\circ}}$', 'Clim$_{CRU^{*}0.5^{\circ}}$+LU$_{Gl0.5^{\circ}}$',
-            'Clim$_{OSHD0.5^{\circ}}$+LU$_{Gl0.5^{\circ}}$',
-            'Clim$_{CRU0.25^{\circ}}$+LU$_{Gl0.25^{\circ}}$', 'Clim$_{CRU^{*}0.25^{\circ}}$+LU$_{Gl0.25^{\circ}}$',
-            'Clim$_{OSHD0.25^{\circ}}$+LU$_{Gl0.25^{\circ}}$',
-            'Clim$_{CRU1km}$+LU$_{Gl1km}$', 'Clim$_{CRU1km}$+LU$_{HR1km}$',
-            'Clim$_{CRU^{*}1km}$+LU$_{Gl1km}$', 'Clim$_{CRU^{*}1km}$+LU$_{HR1km}$',
-            'Clim$_{OSHD1km}$+LU$_{Gl1km}$', 'Clim$_{OSHD1km}$+LU$_{HR1km}$'
-            ]
-
 run_in_all = run_in_coarse + run_in_all_1km
 
-taylor_feb = []
-taylor_dec = []
-taylor_apr = []
+label_in = ['FSM', 'Clim$_{CRU0.5^{\circ}}$+LU$_{Gl0.5^{\circ}}$', 'Clim$_{CRU^{*}0.5^{\circ}}$+LU$_{Gl0.5^{\circ}}$',
+            'Clim$_{OSHD0.5^{\circ}}$+LU$_{Gl0.5^{\circ}}$', 'Clim$_{CRU0.25^{\circ}}$+LU$_{Gl0.25^{\circ}}$',
+            'Clim$_{CRU^{*}0.25^{\circ}}$+LU$_{Gl0.25^{\circ}}$', 'Clim$_{OSHD0.25^{\circ}}$+LU$_{Gl0.25^{\circ}}$',
+            'Clim$_{CRU1km}$+LU$_{Gl1km}$', 'Clim$_{CRU1km}$+LU$_{HR1km}$',
+            'Clim$_{CRU^{*}1km}$+LU$_{Gl1km}$', 'Clim$_{CRU^{*}1km}$+LU$_{HR1km}$',
+            'Clim$_{OSHD1km}$+LU$_{Gl1km}$', 'Clim$_{OSHD1km}$+LU$_{HR1km}$']
 
-sdev_feb = []
-sdev_apr = []
-sdev_dec = []
-crmsd_feb = []
-crmsd_apr = []
-crmsd_dec = []
-ccoef_feb = []
-ccoef_apr = []
-ccoef_dec = []
+taylor_feb, taylor_dec, taylor_apr = [], [], []
+sdev_feb, sdev_apr, sdev_dec = [], [], []
+crmsd_feb, crmsd_apr, crmsd_dec = [], [], []
+ccoef_feb, ccoef_apr, ccoef_dec = [], [], []
 
-snow_in_025 = '*_025_SNOW_DEPTH*'
 
 for run_in in run_in_all:
     if (run_in == 'CRUJRA_FILES_025deg_cru_new' or run_in == 'CRUJRA_FILES_025deg_cru_new_lapse' or
@@ -123,15 +103,15 @@ for run_in in run_in_all:
     max_feb = clm5_feb.DATA.max()
     max_apr = clm5_apr.DATA.max()
 
-    #make quick plots
+    #  make quick plots
     fig, axs = plt.subplots(3, 4, figsize=[15, 7], frameon=False, subplot_kw={'projection': proj_map})
     for tix in range(0, np.shape(axs)[1]):
         clm5_dec.isel(time=tix).DATA.plot(transform=proj_data, cmap='YlGnBu', add_colorbar=True, ax=axs[0, tix],
-                                        cbar_kwargs={'label': "Snow Depth [m]"}, vmin=0, vmax=max_dec)
+                                          cbar_kwargs={'label': "Snow Depth [m]"}, vmin=0, vmax=max_dec)
         clm5_feb.isel(time=tix).DATA.plot(transform=proj_data, cmap='YlGnBu', add_colorbar=True, ax=axs[1, tix],
-                                        cbar_kwargs={'label': "Snow Depth [m]"}, vmin=0, vmax=max_feb)
+                                          cbar_kwargs={'label': "Snow Depth [m]"}, vmin=0, vmax=max_feb)
         clm5_apr.isel(time=tix).DATA.plot(transform=proj_data, cmap='YlGnBu', add_colorbar=True, ax=axs[2, tix],
-                                        cbar_kwargs={'label': "Snow Depth [m]"}, vmin=0, vmax=max_apr)
+                                          cbar_kwargs={'label': "Snow Depth [m]"}, vmin=0, vmax=max_apr)
     for ii in range(0, np.shape(axs)[0]):
         for jj in range(0, np.shape(axs)[1]):
             axs[ii, jj].axis('off')
@@ -182,22 +162,13 @@ for run_in in run_in_all:
     ccoef_dec.append(stat_dec['ccoef'][1])
 
 # Store statistics in arrays
-sdev_feb = np.array(sdev_feb)
-sdev_apr = np.array(sdev_apr)
-sdev_dec = np.array(sdev_dec)
-
-crmsd_feb = np.array(crmsd_feb)
-crmsd_apr = np.array(crmsd_apr)
-crmsd_dec = np.array(crmsd_dec)
-
-ccoef_feb = np.array(ccoef_feb)
-ccoef_apr = np.array(ccoef_apr)
-ccoef_dec = np.array(ccoef_dec)
-
+sdev_feb, sdev_apr, sdev_dec = np.array(sdev_feb), np.array(sdev_apr), np.array(sdev_dec)
+crmsd_feb, crmsd_apr, crmsd_dec = np.array(crmsd_feb), np.array(crmsd_apr), np.array(crmsd_dec)
+ccoef_feb, ccoef_apr, ccoef_dec = np.array(ccoef_feb), np.array(ccoef_apr), np.array(ccoef_dec)
 
 col_label = ['FSM', 'ClimCRU0.5', 'ClimCRU0.5', 'ClimOSHD0.5', 'ClimCRU0.25', 'ClimCRU*0.25', 'ClimOSHD0.25',
-            'ClimCRU1kmLUGl', 'ClimCRU1kmLUHR', 'ClimCRU*1kmLUGl', 'ClimCRU*1kmLUHR',
-            'ClimOSHD1kmLUGl', 'ClimOSHD1kmLUHR']
+             'ClimCRU1kmLUGl', 'ClimCRU1kmLUHR', 'ClimCRU*1kmLUGl', 'ClimCRU*1kmLUHR', 'ClimOSHD1kmLUGl',
+             'ClimOSHD1kmLUHR']
 metrics_all = pd.DataFrame({'std_dec': sdev_dec, 'std_feb': sdev_feb, 'std_apr': sdev_apr,
                             'crmsd_dec': crmsd_dec, 'crmsd_feb': crmsd_feb, 'crmsd_apr': crmsd_apr,
                             'ccoef_dec': ccoef_dec, 'ccoef_feb': ccoef_feb, 'ccoef_apr': ccoef_apr})
@@ -208,9 +179,7 @@ metrics_all = metrics_all.transpose()
 metrics_all = metrics_all.round(3)
 metrics_all.to_csv(bf_out / 'taylor_metrics.csv')
 
-
 LEGEND_SUBPLOT = (0, 3)
-
 SUBPLOTS_DATA = [
     {
         "axis_idx": (0, 0),
@@ -275,11 +244,6 @@ SUBPLOTS_DATA = [
     }
 ]
 
-# existing_colors = [(217/255, 95/255, 2/255), (27/255, 158/255, 119/255), (117/255, 112/255, 179/255),
-#                   (1.0, 1.0, 1.0), (0.0, 0.0, 0.0)]
-# N = 6
-# col_in = distinctipy.get_colors(N, existing_colors, colorblind_type="Deuteranomaly")
-# get colors which are as different as possible (also for colorblind)
 col_cru = (217/255, 95/255, 2/255)
 col_cruL = (117/255, 112/255, 179/255)
 col_oshd = (27/255, 158/255, 119/255)
@@ -376,7 +340,6 @@ COLS_COR = {
     'tick_labels': '#636161',
     'title': '#636161'
 }
-
 # specify some styles for the standard deviation
 COLS_STD = {
     'grid': '#DDDDDD',
@@ -384,7 +347,6 @@ COLS_STD = {
     'ticks': '#000000',
     'title': '#000000'
 }
-
 # specify some styles for the root mean square deviation
 STYLES_RMS = {
     'color': '#06064f',
@@ -401,7 +363,6 @@ fig, axs = plt.subplots(1, 4, figsize=fig_size)
 del fig_size
 # build subplot by subplot
 for subplot_data in SUBPLOTS_DATA:
-
     # get subplot object and ensure it will be a square
     # y-axis labels will only appear on leftmost subplot
     print(subplot_data["axis_idx"])
@@ -505,16 +466,13 @@ for subplot_data in SUBPLOTS_DATA:
                       fontsize=FONT_SIZE + 3)
     else:
         ax.set_xticklabels(ax.get_xticklabels(), color=ax.get_facecolor())
-
     # just for the peace of mind...
     del subplot_data, ax
 
 # create legend in the last subplot
 ax = axs[LEGEND_SUBPLOT[1]]
 ax.axis('off')
-
-# build legend handles
-legend_handles = []
+legend_handles = []  # build legend handles
 legend_handles.append(mlines.Line2D([], [],
                                     color=STYLES_RMS['color'],
                                     linestyle=STYLES_RMS['linestyle'],
@@ -535,8 +493,5 @@ for marker_label, marker_desc in MARKERS.items():
 # create legend and free memory
 ax.legend(handles=legend_handles, loc="center", fontsize=FONT_SIZE + 2)
 del ax, legend_handles
-
-# avoid some overlapping
 plt.tight_layout()
-
 fig.savefig(bf_out / 'taylor_upscaled.png', transparent=False, bbox_inches='tight')

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Desc:
+Desc: Script for evapotranspiration part of
 Created on 13.01.23 16:01
 @author: malle
 """
@@ -18,7 +18,6 @@ import platform
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
 
-# make switch to windows if working from laptop
 if platform.system() == 'Windows':
     bf = Path('L:\malle\CLM5_CH')
 else:
@@ -73,7 +72,7 @@ a1 = np.array([[evapo_oshd_global_2017.evapo - evapo_oshd_2017.evapo],
 
 min_all, max_all = np.nanmin(a), np.nanmax(a)
 min_diff, max_diff = np.nanmin(a1), np.nanmax(a1)
-diff_lim = np.max([[np.abs(min_diff)], [np.abs(max_diff)]])
+diff_lim = np.max([np.abs(min_diff)], [np.abs(max_diff)])
 
 # now plot:
 proj_data = ccrs.PlateCarree()
@@ -157,10 +156,8 @@ fig.colorbar(p, cax=cbar_abs, orientation="horizontal", label='Evapotranspiratio
 fig.colorbar(p1, cax=cbar_delta, orientation="horizontal", label='$\Delta$ Evapotranspiration [mm]')
 plt.subplots_adjust(right=0.99, top=0.99, wspace=-0.02, hspace=-0.33)
 plt.tight_layout()
-
 fig.savefig(Path(r'/home/lud11/malle/CLM5_CH/new_figures/evapo_spatial_comp_v2.pdf'),
             facecolor='white', transparent=False)
 fig.savefig(Path(r'/home/lud11/malle/CLM5_CH/new_figures/evapo_spatial_comp_v2.png'),
             facecolor='white', transparent=False)
-
 
