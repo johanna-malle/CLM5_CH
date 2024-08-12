@@ -5,6 +5,7 @@ clearvars
 function to aggregate data from PTCLM5 simulations for wiggle plot and
 create wiggle plot for a) crujra based CLM5 runs b) OSHD based CLM5 runs c)
 JIM-based simulations.
+=> Figure 3 of paper
 %}
 
 addpath(genpath('/home/malle/Documents/MATLAB/'));
