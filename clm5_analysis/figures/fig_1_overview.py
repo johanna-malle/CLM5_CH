@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Desc:
+Desc: Script to produce sub-figures of Fig. 1
 Created on 08.12.22 18:02
 @author: malle
 """
