@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Desc:
+Desc: Script to produce Figure 2.
+"Comparisons of point-scale model simulations to observations of snow depth (HS)
+across all simulated snow seasons (October–July)"
 Created on 08.12.22 18:02
 @author: malle
 """
@@ -461,5 +463,7 @@ plt.text(0.915, 0.08, 'RMSE='+str(rmse_3000.HS_jim.values[0])+'m', rotation=0, h
 plt.text(0.915, 0.02, 'MAE='+str(mae_3000.HS_jim.values[0])+'m', rotation=0, ha='left', va='bottom',
          transform=axes.transAxes, fontsize=8.3)
 plt.tight_layout()
-fig.savefig(bf / 'fig_2_revision.png', facecolor='white', transparent=False, bbox_inches='tight')
+bf_out = bf / 'figures_final_revision'
+fig.savefig(bf_out / 'f02.png', facecolor='white', transparent=False, bbox_inches='tight', dpi=1000)
+fig.savefig(bf_out / 'f02.pdf', facecolor='white', transparent=False, bbox_inches='tight')
 

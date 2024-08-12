@@ -23,7 +23,7 @@ if platform.system() == 'Linux':
 else:
     bf = Path('L:\malle\CLM5_CH')
 
-bf_out = bf / 'figures_revisions'
+bf_out = bf / 'figures_final_revision'
 bf_oshd = bf / 'FSM_new/analysed_grid_python_out'
 all_FSM = xr.open_mfdataset(glob.glob(str(bf_oshd / '*025*')))
 snow_in_025 = '*_025_SNOW_DEPTH*'
@@ -494,4 +494,5 @@ for marker_label, marker_desc in MARKERS.items():
 ax.legend(handles=legend_handles, loc="center", fontsize=FONT_SIZE + 2)
 del ax, legend_handles
 plt.tight_layout()
-fig.savefig(bf_out / 'taylor_upscaled.png', transparent=False, bbox_inches='tight')
+fig.savefig(bf_out / 'f04.png', transparent=False, bbox_inches='tight', facecolor='white', dpi=1000)
+fig.savefig(bf_out / 'f04.pdf', transparent=False, bbox_inches='tight', facecolor='white')

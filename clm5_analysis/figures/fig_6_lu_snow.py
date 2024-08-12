@@ -90,32 +90,15 @@ df_box = pd.DataFrame(data=data_all)
 df_box_sm = pd.DataFrame(data=data_large)
 df_box_lrg = pd.DataFrame(data=data_small)
 
-# make plot of boxplot with different axis limits
-fig = plt.figure()  # figsize=(12, 12)
-flierprops = dict(marker='o', markeredgecolor='gray', markerfacecolor='silver', alpha=0.45)
-axes = fig.add_subplot(121)
-ax = sns.boxplot(data=df_box_sm,
-                 ax=axes, flierprops=flierprops, lw=1.6, saturation=0.8, showfliers=False,
-                 meanprops={"marker": "o", "mfc": "white", "mec": "black"},
-                 medianprops=dict(color="grey", alpha=0.85, lw=1.9, linestyle='-'), showmeans=True)
-ax.set_ylabel('HS [m]')
-plt.xticks(rotation=40, ha='right')
-axes = fig.add_subplot(122)
-ax = sns.boxplot(data=df_box_lrg, ax=axes, flierprops=flierprops, linewidth=1.6, saturation=0.8, showfliers=False,
-                 meanprops={"marker": "o", "markerfacecolor": "white", "markeredgecolor": "black"},
-                 medianprops=dict(color="grey", alpha=0.85, linewidth=1.9, linestyle='-'), showmeans=True)
-ax.set_ylabel('HS [m]')
-plt.xticks(rotation=40, ha='right')
-plt.tight_layout()
-fig.savefig(base_dir / 'figures_revisions' / 'boxplot_comp_sm_lrg.png', facecolor='white', transparent=False,
-            bbox_inches='tight')
 
 # now make plot of delta PAI, snow and boxplot in one!
-fig = plt.figure(figsize=(10, 7.5))
-gs = fig.add_gridspec(3, 4)
-ax1 = fig.add_subplot(gs[:2, :2], projection=proj_map)
-ax2 = fig.add_subplot(gs[:2, 2:], projection=proj_map)
-ax3 = fig.add_subplot(gs[2:, 1:3])
+flierprops = dict(marker='o', markeredgecolor='gray', markerfacecolor='silver', alpha=0.45)
+
+fig = plt.figure()
+gs = fig.add_gridspec(4, 4)
+ax1 = fig.add_subplot(gs[:3, :2], projection=proj_map)
+ax2 = fig.add_subplot(gs[:3, 2:], projection=proj_map)
+ax3 = fig.add_subplot(gs[3:, 1:3])
 
 plot_pft.plot(ax=ax1, transform=proj_data, cmap='PiYG', center=0, add_colorbar=True,
               cbar_kwargs=dict(location="right", label=r"$\Delta$PAI (LAI+SAI)", shrink=0.5))
@@ -137,6 +120,8 @@ ax = sns.boxplot(data=df_box,
 ax3.set_ylabel('HS [m]')
 ax3.set_title('(c)', loc='left')
 plt.xticks(rotation=20, ha='right')
-plt.tight_layout()
-fig.savefig(base_dir / 'figures_revisions' / 'comb_fig_lc.png', facecolor='white', transparent=False,
+plt.subplots_adjust(wspace=0.5, hspace=-0.35)
+fig.savefig(base_dir / 'figures_final_revision' / 'f06.png', facecolor='white', transparent=False,
+            bbox_inches='tight', dpi=1000)
+fig.savefig(base_dir / 'figures_final_revision' / 'f06.pdf', facecolor='white', transparent=False,
             bbox_inches='tight')
