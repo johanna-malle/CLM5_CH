@@ -5,6 +5,11 @@ Author: Johanna Malle (<mailto:johanna.malle@wsl.ch>)
 
 All CLM5 simulation result and land surface forcing datasets used in the analysis scripts are available from the [WSL data repository EnviDat](https://doi.org/10.16904/envidat.525), as are [FSM2 snow simulation results](https://doi.org/10.16904/envidat.404). 
 
+Zenodo link: 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13305963.svg)](https://doi.org/10.5281/zenodo.13305963)
+
+
+
 ## Main scripts
 * General analysis scripts used in this study are found under [clm5_analysis](clm5_analysis)
 * Scripts used to generate figures of paper can be found under [clm5_analysis/figures](clm5_analysis/figures)
